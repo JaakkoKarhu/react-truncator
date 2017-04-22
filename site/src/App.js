@@ -26,6 +26,11 @@ Sed sagittis enim ut velit ultrices mollis. Donec arcu velit, sodales eget orci 
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
     	</Truncator>
     </div>
+    <div className="text-wrapper" id="is-one-line">
+      <Truncator>
+      	One liner here.
+      </Truncator>
+    </div>
     <div className="text-wrapper padded">
       <Truncator>
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis tempus auctor orci ut porta. Aenean quis porttitor enim, eget luctus ligula. Donec commodo massa lacus, eu bibendum nisi consequat a. Nam lacus risus, pellentesque a pellentesque a, tristique sed justo. Nullam porta sem ac ipsum suscipit feugiat. Duis porta ligula a eros lobortis euismod. In hac habitasse platea dictumst. Praesent eu nisl mi.

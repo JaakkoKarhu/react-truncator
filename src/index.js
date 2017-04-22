@@ -23,11 +23,11 @@
  * - Add element resize functions
  * - Rename fine search to something more descriptive
  * - Test with text, which includes spans
- * - Fix one liner bug
+ * - Fix too much/little padding bug
  * - Make catch error for embedded html elements?
  * - Split component did updat functions to pure functions
- * - Try with paddings
  * - Make style passable directly to truncator
+ * - Scenario: if text passed in props changes
  */
 import React from 'react';
 
@@ -41,7 +41,7 @@ class Truncator extends React.Component {
     super (props)
     this.state = { // Define defaults
       segments: [],
-      concatenated: ''
+      concatted: ''
     }
   }
 
@@ -84,21 +84,23 @@ class Truncator extends React.Component {
       let childNodes = this.refs.truncated.childNodes
       let fine = this.state.fine
       let segments = [ ...this.state.segments] // Could be segments copy etc
-      if (fine&&!this.state.concatenated) {
-        if (childNodes[fine].offsetTop===childNodes[fine-1].offsetTop) {
+      if (fine&&!this.state.concatted) {
+        if (fine==childNodes.length-1) { // End of array, prevent infinite loop
+          this.setState({ concatted: this.props.children })
+        } else if (childNodes[fine].offsetTop===childNodes[fine-1].offsetTop) {
           // Find the right spot...
           this.fineSearch(segments, fine)
         } else {
           // ...until can be set as plain text
           segments.splice(fine, segments.length)
-          let concatenated = ''
+          let concatted = ''
           segments.map((segment) => {
-            concatenated = concatenated + segment.str
+            concatted = concatted + segment.str
           })
-          concatenated = concatenated.substring(0, concatenated.length - 4) + '...'
-          this.setState({ concatenated })
+          concatted = concatted.substring(0, concatted.length - 4) + '...'
+          this.setState({ concatted })
         }
-      } else if (!this.state.concatenated) {
+      } else if (!this.state.concatted) {
         let prevY
         for (let i = 0; i < childNodes.length; i++) {
           let child = childNodes[i]
@@ -111,7 +113,7 @@ class Truncator extends React.Component {
             this.splitSegment(segments, splitKey)
             break
           } else if (i == childNodes.length - 1) {
-            this.setState({ concatenated: this.props.children })
+            this.setState({ concatted: this.props.children })
             break
           }
           prevY = child.offsetTop
@@ -135,12 +137,12 @@ class Truncator extends React.Component {
   render() {
     console.log('index.js', 'RENDER', 'Log here');
     let segments = this.state.segments
-    let concatenated = this.state.concatenated
+    let concatted = this.state.concatted
     return (
       <trnc-wrap ref="truncated">
         {
-          concatenated
-          ? concatenated
+          concatted
+          ? concatted
           : this.getSpans(segments)
         }
       </trnc-wrap>
