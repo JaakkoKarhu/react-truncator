@@ -6,21 +6,24 @@
     <title>React Component Boilerplate</title>
     <style>
       .text-wrapper {
-        width: 420px;
-        height: 230px;
+        width: 440px;
+        height: 100px;
         border: solid thin lightgray;
+        float: left;
+        margin: 15px;
+        box-sizing: border-box;
       }
-      trnc-seg:nth-child(odd) {
-        background-color: aquamarine;
+      .padded {
+        padding: 40px;
       }
-      trnc-seg:nth-child(even) {
-        background-color: bisque;
-      }
+      trnc-seg.tracker { background-color: #7FBAC5; }
+      trnc-seg.tracker + trnc-seg { background-color: #8BDA9C; }
+
       trnc-seg:nth-child(odd).fine {
-        background-color: yellow;
+        background-color: #FFABA2;
       }
       trnc-seg:nth-child(even).fine {
-        background-color: salmon;
+        background-color: #FFCFA2;
       }
     </style>
   </head>

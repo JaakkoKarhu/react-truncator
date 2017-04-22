@@ -14,6 +14,21 @@
  * - Maybe make a library out of this
  */
 
+/* TODO
+ * 
+ * - Cleaning
+ * - Remove trackers and timers ment for presenting
+ * - Add PropTypes
+ * - Add custom concenation instead of dot dot dot
+ * - Add element resize functions
+ * - Rename fine search to something more descriptive
+ * - Test with text, which includes spans
+ * - Fix one liner bug
+ * - Make catch error for embedded html elements?
+ * - Split component did updat functions to pure functions
+ * - Try with paddings
+ * - Make style passable directly to truncator
+ */
 import React from 'react';
 
 class Truncator extends React.Component {
@@ -24,25 +39,23 @@ class Truncator extends React.Component {
 
   constructor(props) {
     super (props)
-    this.state = {
+    this.state = { // Define defaults
       segments: [],
-      updateStopper: 0,
       concatenated: ''
     }
   }
 
   splitSegment = (_segments, splitKey) => {
-    let newSegments = [ ..._segments ]
+    let newSegments = [ ..._segments ] // Remove underscore naming
     let segment = newSegments[splitKey]
     let str = segment.str
     let length = Math.ceil(str.length/2)
     let _1st = str.substring(0, length);
     let _2nd = str.substring(length);
     newSegments.splice(splitKey, 1)
-    newSegments.splice(splitKey, 0, { str: _1st })
-    newSegments.splice(splitKey+1, 0, { str: _2nd})
-    let updateStopper = this.state.updateStopper+1
-    this.setState({ segments: newSegments, updateStopper })
+    newSegments.splice(splitKey, 0, { str: _1st }) // Why splice here, why just not set?
+    newSegments.splice(splitKey+1, 0, { str: _2nd }) // Same applies here
+    this.setState({ segments: newSegments, tracker: splitKey })
   }
  
   componentDidMount() {
@@ -59,58 +72,68 @@ class Truncator extends React.Component {
     let _2nd = str.substring(indexOf, str.length)
     newSegments[fine - 1] = { str: newSegments[fine-1].str + _1st, className: 'fine' }
     newSegments[fine] = { str: _2nd, className: 'fine' }
-    let updateStopper = this.state.updateStopper+1
-    this.setState({ segments: newSegments, fine, updateStopper })
+    this.setState({ segments: newSegments, fine })
   }
 
-  componentDidUpdate(nextProps, nextState) {
-    setTimeout(() => {
+  componentDidUpdate() {
+
+    //setTimeout(() => {
       let parent = this.refs.truncated.parentNode
+      let paddingBottom = parseInt( window.getComputedStyle(parent).paddingBottom.replace('px', ''))
       let parentBottomY = parent.offsetTop + parent.offsetHeight
       let childNodes = this.refs.truncated.childNodes
       let fine = this.state.fine
-      let segments = [ ...this.state.segments]
+      let segments = [ ...this.state.segments] // Could be segments copy etc
       if (fine&&!this.state.concatenated) {
         if (childNodes[fine].offsetTop===childNodes[fine-1].offsetTop) {
+          // Find the right spot...
           this.fineSearch(segments, fine)
         } else {
+          // ...until can be set as plain text
           segments.splice(fine, segments.length)
           let concatenated = ''
           segments.map((segment) => {
             concatenated = concatenated + segment.str
           })
-          concatenated = concatenated.substring(0, concatenated.length - 3) + '...'
+          concatenated = concatenated.substring(0, concatenated.length - 4) + '...'
           this.setState({ concatenated })
         }
       } else if (!this.state.concatenated) {
         let prevY
         for (let i = 0; i < childNodes.length; i++) {
           let child = childNodes[i]
+          let childBottomY = child.offsetTop + child.offsetHeight + paddingBottom
           if (prevY===child.offsetTop) {
             this.fineSearch(segments, i)
             break
-          } else if (parentBottomY<child.offsetTop) {
-            let splitKey = i - 1
+          } else if (parentBottomY<childBottomY) {
+            let splitKey = i
             this.splitSegment(segments, splitKey)
+            break
+          } else if (i == childNodes.length - 1) {
+            this.setState({ concatenated: this.props.children })
             break
           }
           prevY = child.offsetTop
         }
       }
-    }, 300)
+    //}, 350)
   }
 
   getSpans = (segments) => {
-    let elems = []
-    segments.map((o, i) => {
-      elems.push(<trnc-seg i={i} offset={o.offset} class={ o.className ? o.className : '' }>{o.str}</trnc-seg>)
+    return segments.map((o, i) => {
+      let trackerClass = i===this.state.tracker ? 'tracker' : ''
+      return (
+        <trnc-seg key={i}
+                  class={ `${o.className ? o.className : ''} ${ trackerClass } ` }>
+          {o.str}
+        </trnc-seg>
+      )
     })
-
-    return elems
   }
 
   render() {
-    console.log('index.js', 'RENDERZ', 'Log here');
+    console.log('index.js', 'RENDER', 'Log here');
     let segments = this.state.segments
     let concatenated = this.state.concatenated
     return (
@@ -126,21 +149,3 @@ class Truncator extends React.Component {
 };
 
 export default Truncator;
-
-    // let newArr = [ ...arr ]
-    // let lolArr
-    // lolArr = []
-    // newArr.map((item, _i) => {
-    //   let size = newArr[_i]
-    //   let str = newArr[_i].str
-    //   let length = Math.ceil(str.length/2)
-    //   let firstHalf = str.substring(0, length);
-    //   let secondHalf = str.substring(length);
-    //   let splitIndex = _i * 2
-    //   lolArr[splitIndex] = { str: firstHalf, id: 'will have original id' }
-    //   lolArr[splitIndex + 1] = { str: secondHalf, id: 'will have new id' }
-    // })
-    // newArr = lolArr
-    // return newArr
-
-    // let parentBottomY = parent.offsetTop + parent.offsetHeight
