@@ -19,27 +19,78 @@ describe('Minimum requirements', () => {
 })
 
 describe('Truncation scenarios', () => {
-	let page = nightmare().goto('http://localhost:3000')
+	let page = nightmare()
 
 	test('Truncates when wrapper bottom at the first initial binary text block', async () => {
-		let text = await page.evaluate(() => {
-			return document.getElementById('initial1st').textContent
+		page.goto('http://localhost:3000/1st-half')
+		let o = await page.evaluate(() => {
+			let elem = document.getElementById('test')
+			let child = elem.firstChild
+			let isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
+			return { text: elem.textContent, isInBoundaries }
 		})
-		expect(text.substr(-3)).toBe('...')
+		expect(o.text.substr(-3)).toBe('...')
+		expect(o.isInBoundaries).toBeTruthy()
 	})
 
 	test('Truncates when wrapper bottom at the second initial binary text block', async () => {
-		let text = await page.evaluate(() => {
-			return document.getElementById('initial2nd').textContent
+		page.goto('http://localhost:3000/2nd-half')
+		let o = await page.evaluate(() => {
+			let elem = document.getElementById('test')
+			let child = elem.firstChild
+			let isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
+			return { text: elem.textContent, isInBoundaries }
 		})
-		expect(text.substr(-3)).toBe('...')
+		expect(o.text.substr(-3)).toBe('...')
+		expect(o.isInBoundaries).toBeTruthy()
 	})
 
 	test('Don\'t truncate if text not flowing over the wrapper bottom', async () => {
+		page.goto('http://localhost:3000/shorter-than-wrapper')
 		let text = await page.evaluate(() => {
-			return document.getElementById('shorter-than-wrapper').textContent
+			return document.getElementById('test').textContent
 		})
-		expect(text).toBe('Lorem ipsum dolor sit amet.')
+		expect(text.length>0).toBeTruthy()
+	})
+
+	test('If only one line, render as it is and don\'t crash', async () => {
+		page.goto('http://localhost:3000/one-line')
+		let text = await page.evaluate(() => {
+			return document.getElementById('test').textContent
+		})
+		expect(text).toBe('One liner here.')
+	})
+
+	test('Take padding in account when truncating', async () => {
+		page.goto('http://localhost:3000/with-padding')
+		let o = await page.evaluate(() => {
+			let elem = document.getElementById('test')
+			let child = elem.firstChild
+			let elemBottomY = elem.offsetTop + elem.offsetHeight
+			let childBottomY = child.offsetTop + child.offsetHeight
+			let paddingBottom = parseInt( window.getComputedStyle(elem).paddingBottom.replace('px', ''))
+			let isInBoundaries = elemBottomY > childBottomY
+			let hasBottomPadding = Math.abs(elemBottomY - childBottomY) > paddingBottom
+			return { text: elem.textContent, isInBoundaries, hasBottomPadding }
+		})
+		expect(o.text.substr(-3)).toBe('...')
+		expect(o.isInBoundaries).toBeTruthy()
+		expect(o.hasBottomPadding).toBeTruthy()
+	})
+
+	test('Doesn\'t render any text if not enough space in wrapper', async () => {
+		page.goto('http://localhost:3000/with-too-much-padding')
+		let text1 = await page.evaluate(() => {
+			let elem = document.getElementById('test')
+			return elem.textContent
+		})
+		page.goto('http://localhost:3000/too-narrow-wrapper')
+		let text2 = await page.evaluate(() => {
+			let elem = document.getElementById('test')
+			return elem.textContent
+		})
+		expect(text1).toBe('')
+		expect(text2).toBe('')
 	})
 
 	afterAll(() => {
