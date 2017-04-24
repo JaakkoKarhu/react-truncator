@@ -71,15 +71,30 @@ const TooNarrowWrapper = () => (
 )
 
 const TextHasSpans = () => (
-  <div className="text-wrapper"
-       id="test">
-    <Truncator>
-      <span>
-        Aenean quis porttitor enim, <span>luctus</span> ligula. Donec commodo massa lacus, eu bibendum nisi consequat a. Nam lacus risus, pellentesque a pellentesque a, tristique sed justo. Nullam porta sem ac ipsum suscipit feugiat. Duis porta ligula a eros lobortis euismod.
-        Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper. Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper.
-      </span>
-    </Truncator>
-  </div>
+  <section>
+    <div className="text-wrapper"
+         id="test">
+      <Truncator>
+        <span>
+          Kansa on <b>ilmaissut tahtonsa, julisti Emmanuel Macron voittopuheessaan puoliltaöin</b> Suomen aikaa. <i>Keskustalaiseksi <b>mielletty</b></i> ehdokas edustaa En Marche -liikettä. Macron on alustavien tulosten mukaan saamassa noin 24 prosenttia äänistä. Olemme muuttaneet Ranskan politiikan kasvoja, <i>hän sanoi hurraavalla</i> kansalle. Lisäksi Macron kiitti Francois Fillonia kehotuksesta äänestää itseään vaalien toisella kierroksella. Emmanuel Macron on ensimmäisten tulosten mukaan saamassa <b>23,9</b> prosenttia äänistä ja Marine Le Pen 21,7 prosenttia.
+        </span>
+      </Truncator>
+    </div>
+    <div className="text-wrapper"
+         id="test">
+      <Truncator>
+        <span>
+          Kansa on <b>ilmaissut tahtonsa, julisti Emmanuel Macron voittopuheessaan puoliltaöin</b> Suomen aikaa. <i>Keskustalaiseksi <b>mielletty</b></i> ehdokas edustaa En Marche -liikettä. Macron on alustavien tulosten mukaan saamassa noin 24 prosenttia äänistä. Olemme muuttaneet Ranskan politiikan kasvoja, hän sanoi hurraavalla kansalle. Lisäksi Macron kiitti Francois Fillonia kehotuksesta äänestää itseään vaalien toisella kierroksella. Emmanuel Macron on ensimmäisten tulosten mukaan saamassa <b>23,9</b> prosenttia äänistä ja Marine Le Pen 21,7 prosenttia.
+        </span>
+      </Truncator>
+    </div>
+    <div className="text-wrapper"
+         id="test">
+      <Truncator>
+        Kansa on <b>ilmaissut tahtonsa, julisti Emmanuel Macron voittopuheessaan puoliltaöin</b> Suomen aikaa. <i>Keskustalaiseksi <b>mielletty</b></i> ehdokas edustaa En Marche -liikettä. Macron on alustavien tulosten mukaan saamassa noin 24 prosenttia äänistä. Olemme muuttaneet Ranskan politiikan kasvoja, hän sanoi hurraavalla kansalle. Lisäksi Macron kiitti Francois Fillonia kehotuksesta äänestää itseään vaalien toisella kierroksella. Emmanuel Macron on ensimmäisten tulosten mukaan saamassa <b>23,9</b> prosenttia äänistä ja Marine Le Pen 21,7 prosenttia.
+      </Truncator>
+    </div>
+  </section>
 )
 
 const App = () => (
@@ -140,3 +155,14 @@ const App = () => (
 );
 
 export default App
+
+//Aenean quis porttitor enim, luctus ligula. Donec commodo massa lacus, eu bibendum nisi consequat a. Nam lacus risus, pellentesque a pellentesque a, tristique sed justo. Nullam porta sem ac ipsum suscipit feugiat. Duis porta ligula a eros lobortis euismod.
+//Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper. Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper. Morbi scelerisque lacus non tincidunt ullamcorper. Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper
+
+    // <div className="text-wrapper">
+    //   <Truncator>
+    //     <span>
+    //       Kansa on <b>ilmaissut tahtonsa, julisti Emmanuel Macron voittopuheessaan puoliltaöin</b> Suomen aikaa. <i>Keskustalaiseksi <b>mielletty</b></i> ehdokas edustaa En Marche -liikettä. Macron on alustavien tulosten mukaan saamassa noin 24 prosenttia äänistä. Olemme muuttaneet Ranskan politiikan kasvoja, hän sanoi hurraavalla kansalle. Lisäksi Macron kiitti Francois Fillonia kehotuksesta äänestää itseään vaalien toisella kierroksella. Emmanuel Macron on ensimmäisten tulosten mukaan saamassa <b>23,9</b> prosenttia äänistä ja Marine Le Pen 21,7 prosenttia.
+    //     </span>
+    //   </Truncator>
+    // </div>

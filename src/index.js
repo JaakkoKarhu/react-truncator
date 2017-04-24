@@ -27,6 +27,7 @@
  * - Split component did updat functions to pure functions
  * - Make style passable directly to truncator
  * - Scenario: if text passed in props changes
+ * - Fix text at the middle bug
  */
 import React from 'react';
 // import ReactDOMServer from 'react-dom/server'
@@ -42,29 +43,28 @@ class Truncator extends React.Component {
     this.state = { // Define defaults
       segments: [],
       concatted: null,
-      fine: null
+      fine: null,
+      needsParsing: false,
+      needsAffix: false
     }
   }
 
-  convertToPlainString = (c) => {
-    let plain = ''
-    if (Array.isArray(c)) {
-      c.map((child) => {
-        console.log('index.js', '-->>', 'Log here', child.props);
-        if (child.props&&Array.isArray(child.props.children)) {
-          plain = plain + this.convertToPlainString(child.props.children)
-        } else if (typeof child=='string') {
-          plain = plain + child
-        }
-      })
-    } else if (c.props&&Array.isArray(c.props.children)) {
-      console.log('index.js', 'HAS CHILDREN');
-      plain = plain + this.convertToPlainString(c.props.children)
-    } else if (typeof c=='string') {
-      console.log('index.js', 'CHILD IS A STRING');
-      plain = plain + c
+  convertToPlainString = (c, plain="") => {
+    let whatToDoWithTheChild = (child) => {
+      if (typeof child == 'object'&&child.props) {
+        plain = this.convertToPlainString(child.props.children, plain)
+      } else if (typeof child == 'string' ) {
+        plain = plain + child
+      }
     }
-    console.log('index.js', 'PLAIN --->>>', plain);
+    if (Array.isArray(c)) {
+      for (let i = 0; i < c.length; i++) {
+        let child = c[i]
+        whatToDoWithTheChild(child)
+      }
+    } else {
+      whatToDoWithTheChild(c)
+    }
     return plain
   }
 
@@ -83,13 +83,12 @@ class Truncator extends React.Component {
  
   componentDidMount() {
     let segments
-    console.log('index.js', 'df-->>', typeof this.props.children );
+    let needsParsing
     if (typeof this.props.children=='object') {
       let plainString = this.convertToPlainString(this.props.children)
-      console.log('index.js', 'SCENARIO 2', 'Log here');
-      segments = [ { str: 'Lol' } ]
+      segments = [ { str: plainString } ]
+      this.setState({ needsParsing: true })
     } else if (typeof this.props.children=='string') {
-      console.log('index.js', 'SCENARIO', 'Log here');
       segments = [ { str: this.props.children} ]
     }
     this.splitSegment(segments, 0)
@@ -129,11 +128,10 @@ class Truncator extends React.Component {
         segments.map((segment) => {
           concatted = concatted + segment.str
         })
-        concatted = concatted.substring(0, concatted.length - 4) + '...'
-        this.setState({ concatted })
+        concatted = concatted.substring(0, concatted.length - 4)
+        this.setState({ concatted, needsAffix: true })
       }
     } else if (this.state.concatted==null) {
-      console.log('index.js', 'WALFALKFA', 'Log here');
       for (let i = 0; i < childNodes.length; i++) {
         let child = childNodes[i]
         let nextChild = childNodes[i+1]
@@ -150,13 +148,49 @@ class Truncator extends React.Component {
           this.splitSegment(segments, splitKey)
           break
         } else if (i == childNodes.length - 1) {
-          console.log('index.js', '-->>> WHATT', 'Log here');
           this.setState({ concatted: this.props.children })
           break
         }
       }
     }
     //}, 350)
+  }
+
+  reactChildren = {}
+  // Concatted is reference
+  parseStringToChildren = (children, childstr, stopIteration=false) => {
+    let reactElem = []
+    let newChildstr = childstr
+    if (Array.isArray(children)) {
+      for (let i = 0; i < children.length; i++) {
+        let child = children[i]
+        let parsed = this.parseStringToChildren(child, newChildstr)
+        reactElem.push(parsed.reactElem)
+        newChildstr = parsed.childstr
+        stopIteration = parsed.stopIteration
+        if (parsed.stopIteration) {
+          break
+        }
+      }
+    } else if (typeof children == 'object') {
+      let parsed
+      if (children.props.children) {
+        parsed = this.parseStringToChildren(children.props.children, newChildstr)
+        newChildstr = parsed.childstr
+        stopIteration = parsed.stopIteration
+      }
+      reactElem = React.createElement(children.type, { ...children.props }, parsed.reactElem)
+    } else if (typeof children == 'string') {
+      newChildstr = childstr + children
+      if (!this.state.concatted.includes(newChildstr)) {
+        let cutOut = this.state.concatted.replace(childstr, '')
+        reactElem = cutOut
+        stopIteration = true
+      } else {
+        reactElem = children
+      }
+    } 
+    return { childstr: newChildstr, reactElem, stopIteration }
   }
 
   getSpans = (segments) => {
@@ -174,12 +208,19 @@ class Truncator extends React.Component {
   render() {
     let segments = this.state.segments
     let concatted = this.state.concatted
-    console.log('index.js', 'Concatted -->>', this.state.concatted);
+    let needsParsing = this.state.needsParsing
+    let needsAffix = this.state.needsAffix
+    let elems
+    if (concatted&&needsParsing) {
+      elems = this.parseStringToChildren(this.props.children, '').reactElem
+    } else  {
+      elems = concatted
+    }
     return (
       <trnc-wrap ref="truncated">
         {
-          concatted!=null
-          ? concatted
+          elems!=null
+          ? [elems, ( needsAffix ? '...' : '' )]
           : this.getSpans(segments)
         }
       </trnc-wrap>
