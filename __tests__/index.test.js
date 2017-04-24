@@ -93,6 +93,29 @@ describe('Truncation scenarios', () => {
 		expect(text2).toBe('')
 	})
 
+	test('Renders correctly with nested span elements', async () => {
+		page.goto('http://localhost:3000/text-has-spans')
+		let o = await page.evaluate(() => {
+			let isInBoundaries = true
+			let elems = document.querySelectorAll('#test')
+			for ( let i = 0; elems.length > i; i++) {
+				let elem = elems[i]
+				let child = elem.firstChild
+				if (!((elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight))) {
+					isInBoundaries = false
+					break
+				}
+			}
+			let hasElemCutout = !!document.getElementsByClassName('cut-inside-nested-inline-element')[0].querySelector('#cutout')
+			let stringHasInlineElem = !!document.getElementsByClassName('text-is-string-with-inline-elements')[0].querySelector('#nested')
+
+			return { isInBoundaries, hasElemCutout, stringHasInlineElem }
+		})
+		expect(o.isInBoundaries).toBeTruthy()
+		expect(o.hasElemCutout).toBeTruthy()
+		expect(o.stringHasInlineElem).toBeTruthy()
+	})
+
 	afterAll(() => {
 		page.halt() // page.end does not stop the node process for some reason
 	})

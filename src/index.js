@@ -159,9 +159,10 @@ class Truncator extends React.Component {
   reactChildren = {}
   // Concatted is reference
   parseStringToChildren = (children, childstr, stopIteration=false) => {
-    let reactElem = []
+    let reactElem
     let newChildstr = childstr
     if (Array.isArray(children)) {
+      reactElem = []
       for (let i = 0; i < children.length; i++) {
         let child = children[i]
         let parsed = this.parseStringToChildren(child, newChildstr)
