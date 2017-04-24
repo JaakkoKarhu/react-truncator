@@ -23,7 +23,6 @@
  * - Add element resize functions
  * - Rename fine search to something more descriptive
  * - Test with text, which includes spans
- * - Make catch error for embedded html elements?
  * - Split component did updat functions to pure functions
  * - Make style passable directly to truncator
  * - Scenario: if text passed in props changes
@@ -49,23 +48,22 @@ class Truncator extends React.Component {
     }
   }
 
-  convertToPlainString = (c, plain="") => {
-    let whatToDoWithTheChild = (child) => {
-      if (typeof child == 'object'&&child.props) {
-        plain = this.convertToPlainString(child.props.children, plain)
-      } else if (typeof child == 'string' ) {
-        plain = plain + child
+  convertToPlainString = (children, plain="") => {
+    if (Array.isArray(children)) {
+      for (let i = 0; i < children.length; i++) {
+        let child = children[i]
+        if (typeof child == 'object'&&child.props) {
+          plain = this.convertToPlainString(child.props.children, plain)
+        } else if (typeof child == 'string' ) {
+          plain = plain + child
+        }
       }
+      return plain
+    } else if (typeof children == 'object'&&children.props) {
+      return plain = this.convertToPlainString(children.props.children, plain)
+    } else if (typeof children == 'string') {
+      return plain = plain + children
     }
-    if (Array.isArray(c)) {
-      for (let i = 0; i < c.length; i++) {
-        let child = c[i]
-        whatToDoWithTheChild(child)
-      }
-    } else {
-      whatToDoWithTheChild(c)
-    }
-    return plain
   }
 
   splitSegment = (_segments, splitKey) => {
@@ -157,41 +155,57 @@ class Truncator extends React.Component {
   }
 
   reactChildren = {}
-  // Concatted is reference
-  parseStringToChildren = (children, childstr, stopIteration=false) => {
-    let reactElem
-    let newChildstr = childstr
+
+  convertToConcattedChi = (children, childStr, stopIteration=false) => {
     if (Array.isArray(children)) {
-      reactElem = []
+      let reactElem = []
+      let childStrCopy = childStr
       for (let i = 0; i < children.length; i++) {
         let child = children[i]
-        let parsed = this.parseStringToChildren(child, newChildstr)
+        let parsed = this.convertToConcattedChi(child, childStrCopy)
         reactElem.push(parsed.reactElem)
-        newChildstr = parsed.childstr
+        childStrCopy = parsed.childStr
         stopIteration = parsed.stopIteration
-        if (parsed.stopIteration) {
-          break
-        }
+        if (parsed.stopIteration) { break }
+      }
+      return {
+        childStr: childStrCopy,
+        reactElem,
+        stopIteration
       }
     } else if (typeof children == 'object') {
-      let parsed
       if (children.props.children) {
-        parsed = this.parseStringToChildren(children.props.children, newChildstr)
-        newChildstr = parsed.childstr
+        let parsed = this.convertToConcattedChi(children.props.children, childStr)
         stopIteration = parsed.stopIteration
-      }
-      reactElem = React.createElement(children.type, { ...children.props }, parsed.reactElem)
-    } else if (typeof children == 'string') {
-      newChildstr = childstr + children
-      if (!this.state.concatted.includes(newChildstr)) {
-        let cutOut = this.state.concatted.replace(childstr, '')
-        reactElem = cutOut
-        stopIteration = true
+        return {
+          childStr: parsed.childStr,
+          reactElem: React.createElement(children.type, { ...children.props }, parsed.reactElem),
+          stopIteration: parsed.stopIteration
+        }
       } else {
-        reactElem = children
+        return {
+          childStr,
+          reactElem: React.createElement(children.type, { ...children.props }),
+          stopIteration
+        }
+      }
+    } else if (typeof children == 'string') {
+      let concatted = this.state.concatted
+      if (!concatted.includes(childStr + children)) {
+        let cutOut = concatted.replace(childStr, '')
+        return {
+          childStr: childStr + children,
+          reactElem: cutOut,
+          stopIteration: true
+        }
+      } else {
+        return {
+          childStr: childStr + children,
+          reactElem: children,
+          stopIteration
+        }
       }
     } 
-    return { childstr: newChildstr, reactElem, stopIteration }
   }
 
   getSpans = (segments) => {
@@ -213,7 +227,7 @@ class Truncator extends React.Component {
     let needsAffix = this.state.needsAffix
     let elems
     if (concatted&&needsParsing) {
-      elems = this.parseStringToChildren(this.props.children, '').reactElem
+      elems = this.convertToConcattedChi(this.props.children, '').reactElem
     } else  {
       elems = concatted
     }
