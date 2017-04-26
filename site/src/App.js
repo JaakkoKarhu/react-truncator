@@ -30,6 +30,16 @@ const SecondHalf = () => (
   </div>
 )
 
+const InitialMiddle = () => (
+  <div className="text-wrapper"
+       id="test">
+    <Truncator>
+      Aenean quis porttitor enim, luctus ligula. Donec commodo massa lacus, eu bibendum nisi consequat a. Nam lacus risus, pellentesque a pellentesque a, tristique sed justo. Nullam porta sem ac ipsum suscipit feugiat. Duis porta ligula a eros lobortis euismod.
+      Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper. Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper. Morbi scelerisque lacus non tincidunt ullamcorper. Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper
+    </Truncator>
+  </div>
+)
+
 const ShorterThanWrapper = () => (
   <div className="text-wrapper"
        id="test">
@@ -70,7 +80,7 @@ const TooNarrowWrapper = () => (
   </div>
 )
 
-const TextHasSpans = () => (
+const TextHasInlineElements = () => (
   <section>
     <div className="text-wrapper text-is-wrapped-in-span"
          id="test">
@@ -108,6 +118,11 @@ const App = () => (
           </Link>
         </li>
         <li>
+          <Link to="initial-middle">
+            Truncate in initial middle
+          </Link>
+        </li>
+        <li>
           <Link to="shorter-than-wrapper">
             Text shorter than wrapper
           </Link>
@@ -133,19 +148,20 @@ const App = () => (
           </Link>
         </li>
         <li>
-          <Link to="text-has-spans">
-            Text has spans
+          <Link to="text-has-inline-elements">
+            Text has inline elements
           </Link>
         </li>
       </ul>
       <Route path="/1st-half" component={ FirstHalf } />
       <Route path="/2nd-half" component={ SecondHalf } />
+      <Route path="/initial-middle" component={ InitialMiddle } />
       <Route path="/shorter-than-wrapper" component={ ShorterThanWrapper } />
       <Route path="/one-line" component={ OneLine } />
       <Route path="/with-padding" component={ () => WithPadding('30px') } />
       <Route path="/with-too-much-padding" component={ () => WithPadding('50px') } />
       <Route path="/too-narrow-wrapper" component={ TooNarrowWrapper } />
-      <Route path="/text-has-spans" component={ TextHasSpans } />
+      <Route path="/text-has-inline-elements" component={ TextHasInlineElements } />
     </div>
   </Router>
 );

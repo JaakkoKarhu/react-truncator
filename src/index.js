@@ -9,24 +9,20 @@
  *   or line number
  *
  * - Recognise component/tag coming in - before that use proptypes
- * - Possible to wrap the lines even!
  * - Add resize event
- * - Maybe make a library out of this
  */
 
 /* TODO
  * 
- * - Cleaning
- * - Remove trackerIndexs and timers ment for presenting
- * - Add PropTypes
- * - Add custom concenation instead of dot dot dot
  * - Add element resize functions
- * - Rename fine search to something more descriptive
- * - Test with text, which includes spans
- * - Split component did updat functions to pure functions
- * - Make style passable directly to truncator
+ * - Add PropTypes
  * - Scenario: if text passed in props changes
- * - Fix text at the middle bug
+ * - Rename fine search to something more descriptive
+ * - Remove trackerIndexs and timers ment for presenting
+ * - Add custom concenation instead of dot dot dot
+ * - Split component did updat functions to pure functions
+ * - Cleaning
+ * - Make style passable directly to truncator
  */
 import React from 'react';
 // import ReactDOMServer from 'react-dom/server'
@@ -95,7 +91,7 @@ class Truncator extends React.Component {
   fineSearch = (_segments, fine) => {
     let newSegments = [ ..._segments ]
     let segment = newSegments[fine]
-    let str = newSegments[fine].str
+    let str = segment.str
     let indexOf = str.indexOf(' ') + 1
     let _1st = str.substring(0, indexOf)
     let _2nd = str.substring(indexOf, str.length)
@@ -113,6 +109,7 @@ class Truncator extends React.Component {
     let fine = this.state.fine
     let segments = [ ...this.state.segments] // Could be segments copy etc
     if (fine&&this.state.concatted==null) {
+      console.log('index.js', 'GOES TO FINE');
       if (fine==childNodes.length-1) {
         // How does this differ from the last if on coarse iteration?
         this.setState({ concatted: this.props.children })
@@ -131,38 +128,44 @@ class Truncator extends React.Component {
       }
     } else if (this.state.concatted==null) {
       for (let i = 0; i < childNodes.length; i++) {
+        let { truncated } = this.refs
         let child = childNodes[i]
         let nextChild = childNodes[i+1]
         let childBottomY = child.offsetTop + child.offsetHeight
         let shouldBeOnFineSearch = nextChild&&nextChild.offsetTop===child.offsetTop
-        if (shouldBeOnFineSearch&&parentBottomY<childBottomY) {
+        let flowsOverBottom = parentBottomY<childBottomY
+        let isFirstLine = truncated.offsetTop==child.offsetTop
+        let noNeedToTruncate = (truncated.offsetTop+truncated.offsetHeight)<(parentBottomY)
+        if (noNeedToTruncate) {
+          this.setState({ concatted: this.props.children })
+          break
+        } else if (!isFirstLine&&shouldBeOnFineSearch&&flowsOverBottom) {
+          this.splitSegment(segments, i-1)
+          break
+        } else if (shouldBeOnFineSearch&&flowsOverBottom) {
           this.setState({ concatted: ''})
           break
         } else if (shouldBeOnFineSearch) {
           this.fineSearch(segments, i + 1)
           break
-        } else if (parentBottomY<childBottomY) {
-          let splitKey = i
-          this.splitSegment(segments, splitKey)
-          break
-        } else if (i == childNodes.length - 1) {
-          this.setState({ concatted: this.props.children })
+        } else if (flowsOverBottom) {
+          this.splitSegment(segments, i)
           break
         }
       }
     }
-    //}, 350)
+    //}, 50)
   }
 
   reactChildren = {}
 
-  convertToConcattedChi = (children, childStr, stopIteration=false) => {
+  convertToConcattedChild = (children, childStr, stopIteration=false) => {
     if (Array.isArray(children)) {
       let reactElem = []
       let childStrCopy = childStr
       for (let i = 0; i < children.length; i++) {
         let child = children[i]
-        let parsed = this.convertToConcattedChi(child, childStrCopy)
+        let parsed = this.convertToConcattedChild(child, childStrCopy)
         reactElem.push(parsed.reactElem)
         childStrCopy = parsed.childStr
         stopIteration = parsed.stopIteration
@@ -175,7 +178,7 @@ class Truncator extends React.Component {
       }
     } else if (typeof children == 'object') {
       if (children.props.children) {
-        let parsed = this.convertToConcattedChi(children.props.children, childStr)
+        let parsed = this.convertToConcattedChild(children.props.children, childStr)
         stopIteration = parsed.stopIteration
         return {
           childStr: parsed.childStr,
@@ -210,10 +213,10 @@ class Truncator extends React.Component {
 
   getSpans = (segments) => {
     return segments.map((o, i) => {
-      let trackerIndex = i===this.state.trackerIndex ? 'trackerIndex' : ''
+      let trackerIndex = i===this.state.trackerIndex ? 'tracker' : ''
       return (
         <trnc-seg key={i}
-                  class={ `${o.className ? o.className : ''} ${ trackerIndex } ` }>
+                  class={ `${o.className ? o.className : ''} ${ trackerIndex }` }>
           {o.str}
         </trnc-seg>
       )
@@ -227,7 +230,7 @@ class Truncator extends React.Component {
     let needsAffix = this.state.needsAffix
     let elems
     if (concatted&&needsParsing) {
-      elems = this.convertToConcattedChi(this.props.children, '').reactElem
+      elems = this.convertToConcattedChild(this.props.children, '').reactElem
     } else  {
       elems = concatted
     }

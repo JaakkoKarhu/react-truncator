@@ -30,6 +30,7 @@ describe('Truncation scenarios', () => {
 			return { text: elem.textContent, isInBoundaries }
 		})
 		expect(o.text.substr(-3)).toBe('...')
+		expect(o.text.length>3).toBeTruthy()
 		expect(o.isInBoundaries).toBeTruthy()
 	})
 
@@ -42,6 +43,7 @@ describe('Truncation scenarios', () => {
 			return { text: elem.textContent, isInBoundaries }
 		})
 		expect(o.text.substr(-3)).toBe('...')
+		expect(o.text.length>3).toBeTruthy()
 		expect(o.isInBoundaries).toBeTruthy()
 	})
 
@@ -74,6 +76,7 @@ describe('Truncation scenarios', () => {
 			return { text: elem.textContent, isInBoundaries, hasBottomPadding }
 		})
 		expect(o.text.substr(-3)).toBe('...')
+		expect(o.text.length>3).toBeTruthy()
 		expect(o.isInBoundaries).toBeTruthy()
 		expect(o.hasBottomPadding).toBeTruthy()
 	})
@@ -94,7 +97,7 @@ describe('Truncation scenarios', () => {
 	})
 
 	test('Renders correctly with nested span elements', async () => {
-		page.goto('http://localhost:3000/text-has-spans')
+		page.goto('http://localhost:3000/text-has-inline-elements')
 		let o = await page.evaluate(() => {
 			let isInBoundaries = true
 			let elems = document.querySelectorAll('#test')
