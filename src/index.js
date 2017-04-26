@@ -95,7 +95,7 @@ class Truncator extends React.Component {
     newSegments.splice(splitKey, 1)
     newSegments.splice(splitKey, 0, { str: _1st }) // Why splice here, why just not set?
     newSegments.splice(splitKey+1, 0, { str: _2nd }) // Same applies here
-    this.setState({ segments: newSegments, trackerIndex: splitKey })
+    this.setState({ segments: newSegments, trackerIndex: splitKey }, this.evaluateTruncation)
   }
  
   componentDidMount() {
@@ -111,11 +111,11 @@ class Truncator extends React.Component {
     let _2nd = str.substring(indexOf, str.length)
     newSegments[fine-1] = { str: newSegments[fine-1].str + _1st, className: 'fine' }
     newSegments[fine] = { str: _2nd, className: 'fine' }
-    this.setState({ segments: newSegments, fine })
+    this.setState({ segments: newSegments, fine }, this.evaluateTruncation)
   }
 
-  componentDidUpdate() {
-    //setTimeout(() => {
+  evaluateTruncation = () => {
+    setTimeout(() => {
     let parent = this.refs.truncated.parentNode
     let paddingBottom = parseInt( window.getComputedStyle(parent).paddingBottom.replace('px', ''))
     let parentBottomY = parent.offsetTop + parent.offsetHeight - paddingBottom
@@ -163,7 +163,7 @@ class Truncator extends React.Component {
         }
       }
     }
-    //}, 50)
+    }, 50)
   }
 
   reactChildren = {}

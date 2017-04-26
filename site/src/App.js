@@ -106,18 +106,18 @@ const TextHasInlineElements = () => (
 class OnResize extends React.Component {
   constructor(props) {
     super(props)
-    // this.interval = setInterval(() => {
-    //   let elem = this.refs.onResize
-    //   if (elem.offsetWidth>439) {
-    //     elem.style.width = '220px'
-    //   } else {
-    //     elem.style.width = '440px'
-    //   }
-    // }, 1200)
+    this.interval = setInterval(() => {
+      let elem = this.refs.onResize
+      if (elem.offsetWidth>439) {
+        elem.style.width = '220px'
+      } else {
+        elem.style.width = '440px'
+      }
+    }, 1200)
   }
 
   componentWillUnmount() {
-    //clearInterval(this.interval)
+    clearInterval(this.interval)
   }
   
   render() {
