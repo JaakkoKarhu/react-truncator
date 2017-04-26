@@ -15,6 +15,7 @@
 /* TODO
  * 
  * - Add element resize functions
+ * - Check if needs parsing is actually even needed
  * - Add PropTypes
  * - Scenario: if text passed in props changes
  * - Rename fine search to something more descriptive
@@ -41,6 +42,28 @@ class Truncator extends React.Component {
       fine: null,
       needsParsing: false,
       needsAffix: false
+    }
+  }
+
+  init = () => {
+    let parent = this.refs.truncated.parentNode
+    let { truncated } = this.refs
+    let paddingBottom = parseInt( window.getComputedStyle(parent).paddingBottom.replace('px', ''))
+    let parentBottomY = parent.offsetTop + parent.offsetHeight - paddingBottom
+    let noNeedToTruncate = (truncated.offsetTop+truncated.offsetHeight)<(parentBottomY)
+    if (noNeedToTruncate) {
+      this.setState({ concatted: this.props.children })
+    } else {
+      let segments
+      let needsParsing
+      if (typeof this.props.children=='object') {
+        let plainString = this.convertToPlainString(this.props.children)
+        segments = [ { str: plainString } ]
+        this.setState({ needsParsing: true })
+      } else if (typeof this.props.children=='string') {
+        segments = [ { str: this.props.children} ]
+      }
+      this.splitSegment(segments, 0)
     }
   }
 
@@ -76,16 +99,7 @@ class Truncator extends React.Component {
   }
  
   componentDidMount() {
-    let segments
-    let needsParsing
-    if (typeof this.props.children=='object') {
-      let plainString = this.convertToPlainString(this.props.children)
-      segments = [ { str: plainString } ]
-      this.setState({ needsParsing: true })
-    } else if (typeof this.props.children=='string') {
-      segments = [ { str: this.props.children} ]
-    }
-    this.splitSegment(segments, 0)
+    this.init()
   }
 
   fineSearch = (_segments, fine) => {
@@ -109,7 +123,6 @@ class Truncator extends React.Component {
     let fine = this.state.fine
     let segments = [ ...this.state.segments] // Could be segments copy etc
     if (fine&&this.state.concatted==null) {
-      console.log('index.js', 'GOES TO FINE');
       if (fine==childNodes.length-1) {
         // How does this differ from the last if on coarse iteration?
         this.setState({ concatted: this.props.children })
@@ -135,11 +148,7 @@ class Truncator extends React.Component {
         let shouldBeOnFineSearch = nextChild&&nextChild.offsetTop===child.offsetTop
         let flowsOverBottom = parentBottomY<childBottomY
         let isFirstLine = truncated.offsetTop==child.offsetTop
-        let noNeedToTruncate = (truncated.offsetTop+truncated.offsetHeight)<(parentBottomY)
-        if (noNeedToTruncate) {
-          this.setState({ concatted: this.props.children })
-          break
-        } else if (!isFirstLine&&shouldBeOnFineSearch&&flowsOverBottom) {
+        if (!isFirstLine&&shouldBeOnFineSearch&&flowsOverBottom) {
           this.splitSegment(segments, i-1)
           break
         } else if (shouldBeOnFineSearch&&flowsOverBottom) {
@@ -229,6 +238,7 @@ class Truncator extends React.Component {
     let needsParsing = this.state.needsParsing
     let needsAffix = this.state.needsAffix
     let elems
+    let spans = this.getSpans(segments) // segs actually
     if (concatted&&needsParsing) {
       elems = this.convertToConcattedChild(this.props.children, '').reactElem
     } else  {
@@ -239,7 +249,7 @@ class Truncator extends React.Component {
         {
           elems!=null
           ? [elems, ( needsAffix ? '...' : '' )]
-          : this.getSpans(segments)
+          : spans.length > 0 ? spans : this.props.children
         }
       </trnc-wrap>
     );

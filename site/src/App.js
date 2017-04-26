@@ -103,6 +103,38 @@ const TextHasInlineElements = () => (
   </section>
 )
 
+class OnResize extends React.Component {
+  constructor(props) {
+    super(props)
+    // this.interval = setInterval(() => {
+    //   let elem = this.refs.onResize
+    //   if (elem.offsetWidth>439) {
+    //     elem.style.width = '220px'
+    //   } else {
+    //     elem.style.width = '440px'
+    //   }
+    // }, 1200)
+  }
+
+  componentWillUnmount() {
+    //clearInterval(this.interval)
+  }
+  
+  render() {
+    return (
+      <div className="text-wrapper"
+           id="test"
+           ref="onResize">
+        <Truncator>
+          Sed sagittis enim ut velit ultrices mollis. Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper.
+      
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis tempus auctor orci ut porta. Aenean quis porttitor enim, eget luctus ligula. Donec commodo massa lacus, eu bibendum nisi consequat a. Nam lacus risus, pellentesque a pellentesque a, tristique sed justo. Nullam porta sem ac ipsum suscipit feugiat. Duis porta ligula a eros lobortis euismod. In hac habitasse platea dictumst. Praesent eu nisl mi.
+        </Truncator>
+      </div>
+    );
+  }
+};
+
 const App = () => (
   <Router>
     <div>
@@ -152,6 +184,11 @@ const App = () => (
             Text has inline elements
           </Link>
         </li>
+        <li>
+          <Link to="on-resize">
+            On resize
+          </Link>
+        </li>
       </ul>
       <Route path="/1st-half" component={ FirstHalf } />
       <Route path="/2nd-half" component={ SecondHalf } />
@@ -162,6 +199,7 @@ const App = () => (
       <Route path="/with-too-much-padding" component={ () => WithPadding('50px') } />
       <Route path="/too-narrow-wrapper" component={ TooNarrowWrapper } />
       <Route path="/text-has-inline-elements" component={ TextHasInlineElements } />
+      <Route path="/on-resize" component={ OnResize } />
     </div>
   </Router>
 );
