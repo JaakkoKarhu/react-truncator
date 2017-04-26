@@ -19,7 +19,12 @@ describe('Minimum requirements', () => {
 })
 
 describe('Truncation scenarios', () => {
-	let page = nightmare()
+	const page = nightmare()
+	const basicTruncationExpectations = (o) => {
+		expect(o.text.substr(-3)).toBe('...')
+		expect(o.text.length>3).toBeTruthy()
+		expect(o.isInBoundaries).toBeTruthy()
+	}
 
 	test('Truncates when wrapper bottom at the first initial binary text block', async () => {
 		page.goto('http://localhost:3000/1st-half')
@@ -29,9 +34,7 @@ describe('Truncation scenarios', () => {
 			let isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
 			return { text: elem.textContent, isInBoundaries }
 		})
-		expect(o.text.substr(-3)).toBe('...')
-		expect(o.text.length>3).toBeTruthy()
-		expect(o.isInBoundaries).toBeTruthy()
+		basicTruncationExpectations(o)
 	})
 
 	test('Truncates when wrapper bottom at the second initial binary text block', async () => {
@@ -42,9 +45,18 @@ describe('Truncation scenarios', () => {
 			let isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
 			return { text: elem.textContent, isInBoundaries }
 		})
-		expect(o.text.substr(-3)).toBe('...')
-		expect(o.text.length>3).toBeTruthy()
-		expect(o.isInBoundaries).toBeTruthy()
+		basicTruncationExpectations(o)
+	})
+
+	test('Truncates when the middle of initial binary blocks overlaps the wrapper bottom', async () => {
+		page.goto('http://localhost:3000/initial-middle')
+		let o = await page.evaluate(() => {
+			let elem = document.getElementById('test')
+			let child = elem.firstChild
+			let isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
+			return { text: elem.textContent, isInBoundaries }
+		})
+		basicTruncationExpectations(o)
 	})
 
 	test('Don\'t truncate if text not flowing over the wrapper bottom', async () => {
@@ -75,9 +87,7 @@ describe('Truncation scenarios', () => {
 			let hasBottomPadding = Math.abs(elemBottomY - childBottomY) > paddingBottom
 			return { text: elem.textContent, isInBoundaries, hasBottomPadding }
 		})
-		expect(o.text.substr(-3)).toBe('...')
-		expect(o.text.length>3).toBeTruthy()
-		expect(o.isInBoundaries).toBeTruthy()
+		basicTruncationExpectations(o)
 		expect(o.hasBottomPadding).toBeTruthy()
 	})
 
