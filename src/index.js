@@ -14,10 +14,9 @@
 
 /* TODO
  * 
- * - Add element resize functions
+ * - Scenario: if text passed in props changes
  * - Check if needs parsing is actually even needed
  * - Add PropTypes
- * - Scenario: if text passed in props changes
  * - Rename fine search to something more descriptive
  * - Remove trackerIndexs and timers ment for presenting
  * - Add custom concenation instead of dot dot dot
@@ -25,8 +24,17 @@
  * - Cleaning
  * - Make style passable directly to truncator
  */
+
 import React from 'react';
-// import ReactDOMServer from 'react-dom/server'
+import ResizeObserver from 'resize-observer-polyfill';
+
+const defaultState = {
+  segments: [],
+  concatted: null,
+  fine: null,
+  needsParsing: false,
+  needsAffix: false
+}
 
 class Truncator extends React.Component {
 
@@ -36,13 +44,7 @@ class Truncator extends React.Component {
 
   constructor(props) {
     super (props)
-    this.state = { // Define defaults
-      segments: [],
-      concatted: null,
-      fine: null,
-      needsParsing: false,
-      needsAffix: false
-    }
+    this.state = defaultState
   }
 
   init = () => {
@@ -100,6 +102,20 @@ class Truncator extends React.Component {
  
   componentDidMount() {
     this.init()
+    this.ro = new ResizeObserver((entries) => {
+      this.setState(defaultState, this.init)
+    })
+    this.ro.observe(this.refs.truncated.parentNode)
+  }
+
+  componentWillUnmount() {
+    this.ro.unobserve(this.refs.truncated.parentNode)
+  }
+
+  componentWillReceiveProps(nP) {
+    if (nP.children!=this.props.children) {
+      this.setState(defaultState, this.init)
+    }
   }
 
   fineSearch = (_segments, fine) => {
@@ -115,7 +131,7 @@ class Truncator extends React.Component {
   }
 
   evaluateTruncation = () => {
-    setTimeout(() => {
+    //setTimeout(() => {
     let parent = this.refs.truncated.parentNode
     let paddingBottom = parseInt( window.getComputedStyle(parent).paddingBottom.replace('px', ''))
     let parentBottomY = parent.offsetTop + parent.offsetHeight - paddingBottom
@@ -123,14 +139,13 @@ class Truncator extends React.Component {
     let fine = this.state.fine
     let segments = [ ...this.state.segments] // Could be segments copy etc
     if (fine&&this.state.concatted==null) {
-      if (fine==childNodes.length-1) {
-        // How does this differ from the last if on coarse iteration?
-        this.setState({ concatted: this.props.children })
-      } else if (childNodes[fine].offsetTop===childNodes[fine-1].offsetTop) {
-        // Find the right spot...
-        this.fineSearch(segments, fine)
-      } else {
+      let cF = childNodes[fine]
+      let cF_ = childNodes[fine-1]
+      let segsOnSameLine = (cF.offsetHeight==cF_.offsetHeight)&&(cF.offsetTop==cF_.offsetTop)
+      let previousSegmentHigher = cF.offsetTop>cF_.offsetTop
+      if (segsOnSameLine||previousSegmentHigher) {
         // ...until can be set as plain text
+        fine = segsOnSameLine ? fine + 1 : fine
         segments.splice(fine, segments.length)
         let concatted = ''
         segments.map((segment) => {
@@ -138,6 +153,8 @@ class Truncator extends React.Component {
         })
         concatted = concatted.substring(0, concatted.length - 4)
         this.setState({ concatted, needsAffix: true })
+      } else if (!segsOnSameLine) {
+        this.fineSearch(segments, fine)
       }
     } else if (this.state.concatted==null) {
       for (let i = 0; i < childNodes.length; i++) {
@@ -163,7 +180,7 @@ class Truncator extends React.Component {
         }
       }
     }
-    }, 50)
+    //}, 100)
   }
 
   reactChildren = {}
