@@ -121,12 +121,56 @@ describe('Truncation scenarios', () => {
 			}
 			let hasElemCutout = !!document.getElementsByClassName('cut-inside-nested-inline-element')[0].querySelector('#cutout')
 			let stringHasInlineElem = !!document.getElementsByClassName('text-is-string-with-inline-elements')[0].querySelector('#nested')
-
 			return { isInBoundaries, hasElemCutout, stringHasInlineElem }
 		})
 		expect(o.isInBoundaries).toBeTruthy()
 		expect(o.hasElemCutout).toBeTruthy()
 		expect(o.stringHasInlineElem).toBeTruthy()
+	})
+
+	test('Truncates on resize', async () => {
+		page.goto('http://localhost:3000/on-resize')
+		let o = await page.evaluate(() => {
+			let r1 = {}
+			let r2 = {}
+			elem = document.getElementById('test')
+			child = elem.firstChild
+			r1.text = elem.textContent
+			r1.isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					r2.text = elem.textContent
+					r2.isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
+					resolve({ r1, r2 })
+				}, 1300)
+			})
+		})
+		expect(o.r1.text==o.r2.text).toBeFalsy()
+		basicTruncationExpectations(o.r1)
+		basicTruncationExpectations(o.r2)
+	})
+
+	// Identical with previous, combine.
+	test('Truncates on prop change', async () => {
+		page.goto('http://localhost:3000/on-props-change')
+		let o = await page.evaluate(() => {
+			let r1 = {}
+			let r2 = {}
+			elem = document.getElementById('test')
+			child = elem.firstChild
+			r1.text = elem.textContent
+			r1.isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					r2.text = elem.textContent
+					r2.isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
+					resolve({ r1, r2 })
+				}, 1300)
+			})
+		})
+		expect(o.r1.text==o.r2.text).toBeFalsy()
+		basicTruncationExpectations(o.r1)
+		basicTruncationExpectations(o.r2)
 	})
 
 	afterAll(() => {
