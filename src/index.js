@@ -6,23 +6,23 @@
  * - Find element y
  * - Use y value to figure out if should be renedered
  * - Decision to truncate can be based on parent elem
- *   or line number
- *
  * - Recognise component/tag coming in - before that use proptypes
  * - Add resize event
  */
 
 /* TODO
  * 
- * - Scenario: if text passed in props changes
- * - Check if needs parsing is actually even needed
+ * - Remove comma or extra dot from the end
+ * - Learn linter
  * - Add PropTypes
  * - Rename fine search to something more descriptive
  * - Remove trackerIndexs and timers ment for presenting
  * - Add custom concenation instead of dot dot dot
- * - Split component did updat functions to pure functions
+ * - Split component did update functions to pure functions
  * - Cleaning
  * - Make style passable directly to truncator
+ * - Inject style
+ * - Write docs
  */
 
 import React from 'react';
@@ -33,13 +33,14 @@ const defaultState = {
   concatted: null,
   fine: null,
   needsParsing: false,
-  needsAffix: false
+  needsEllipsis: false
 }
 
 class Truncator extends React.Component {
 
   static propTypes = {
-    //children: React.PropTypes.array
+    // children: proptype node? any?
+    // ellipsis: string || object
   }
 
   constructor(props) {
@@ -130,6 +131,35 @@ class Truncator extends React.Component {
     this.setState({ segments: newSegments, fine }, this.evaluateTruncation)
   }
 
+  getEllipsisLength = (e) => {
+    let l
+    if (Array.isArray(e)) {
+      let str = ''
+      e.map((o) => {
+        if (o.props) {
+          let { children } = o.props
+          str += o.props ? o.props : ''
+        } else {
+          str += o
+        }
+      })
+      l = str.length
+    } else if (typeof e == 'object') {
+      l = e.props.children.length
+    } else if (typeof e == 'string') {
+      l = e.length
+    }
+    return l ? l + 1 : l
+  }
+
+  removeTrails = (c) => {
+    let l = c.substring(c.length-1)
+    if (l==' '||l==',') {
+      c = this.removeTrails(c.slice(0, c.length-1 ))
+    }
+    return c
+  }
+
   evaluateTruncation = () => {
     //setTimeout(() => {
     let parent = this.refs.truncated.parentNode
@@ -145,14 +175,15 @@ class Truncator extends React.Component {
       let previousSegmentHigher = cF.offsetTop>cF_.offsetTop
       if (segsOnSameLine||previousSegmentHigher) {
         // ...until can be set as plain text
+        let concatted = ''
+        const { ellipsis } = this.props
+        const ellipsisLength = this.getEllipsisLength(ellipsis ? ellipsis : '...')
         fine = segsOnSameLine ? fine + 1 : fine
         segments.splice(fine, segments.length)
-        let concatted = ''
-        segments.map((segment) => {
-          concatted = concatted + segment.str
-        })
-        concatted = concatted.substring(0, concatted.length - 4)
-        this.setState({ concatted, needsAffix: true })
+        segments.map((segment) => concatted += segment.str )
+        concatted = concatted.substring(0, concatted.length - ellipsisLength)
+        concatted = this.removeTrails(concatted)
+        this.setState({ concatted, needsEllipsis: true })
       } else if (!segsOnSameLine) {
         this.fineSearch(segments, fine)
       }
@@ -250,10 +281,9 @@ class Truncator extends React.Component {
   }
 
   render() {
-    let segments = this.state.segments
-    let concatted = this.state.concatted
-    let needsParsing = this.state.needsParsing
-    let needsAffix = this.state.needsAffix
+    let { segments, concatted, needsParsing, needsEllipsis } = this.state
+    let { ellipsis, children } = this.props
+    ellipsis = ellipsis ? ellipsis : '...'
     let elems
     let spans = this.getSpans(segments) // segs actually
     if (concatted&&needsParsing) {
@@ -265,7 +295,7 @@ class Truncator extends React.Component {
       <trnc-wrap ref="truncated">
         {
           elems!=null
-          ? [elems, ( needsAffix ? '...' : '' )]
+          ? [elems, ( needsEllipsis ?  ellipsis : '' )]
           : spans.length > 0 ? spans : this.props.children
         }
       </trnc-wrap>

@@ -103,6 +103,17 @@ const TextHasInlineElements = () => (
   </section>
 )
 
+const WithCustomEllipsis = () => (
+  <div className="text-wrapper"
+       id="test">
+    <Truncator ellipsis={ [' ...', <span className="ellipsis">[ Read more ]</span>] }>
+      Sed sagittis enim ut velit ultrices mollis. Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper.
+      
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis tempus auctor orci ut porta. Aenean quis porttitor enim, eget luctus ligula. Donec commodo massa lacus, eu bibendum nisi consequat a. Nam lacus risus, pellentesque a pellentesque a, tristique sed justo. Nullam porta sem ac ipsum suscipit feugiat. Duis porta ligula a eros lobortis euismod. In hac habitasse platea dictumst. Praesent eu nisl mi.
+    </Truncator>
+  </div>
+)
+
 class OnResize extends React.Component {
   constructor(props) {
     super(props)
@@ -227,6 +238,11 @@ const App = () => (
             On props change
           </Link>
         </li>
+        <li>
+          <Link to="with-custom-ellipsis">
+            With ellipsis
+          </Link>
+        </li>
       </ul>
       <Route path="/1st-half" component={ FirstHalf } />
       <Route path="/2nd-half" component={ SecondHalf } />
@@ -239,11 +255,9 @@ const App = () => (
       <Route path="/text-has-inline-elements" component={ TextHasInlineElements } />
       <Route path="/on-resize" component={ OnResize } />
       <Route path="/on-props-change" component={ OnPropsChange } />
+      <Route path="/with-custom-ellipsis" component={ WithCustomEllipsis } />
     </div>
   </Router>
 );
 
 export default App
-
-//Aenean quis porttitor enim, luctus ligula. Donec commodo massa lacus, eu bibendum nisi consequat a. Nam lacus risus, pellentesque a pellentesque a, tristique sed justo. Nullam porta sem ac ipsum suscipit feugiat. Duis porta ligula a eros lobortis euismod.
-//Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper. Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper. Morbi scelerisque lacus non tincidunt ullamcorper. Donec arcu velit, sodales eget orci nec, accumsan placerat massa. Morbi scelerisque lacus non tincidunt ullamcorper

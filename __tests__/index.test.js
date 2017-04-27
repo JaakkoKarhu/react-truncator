@@ -1,8 +1,3 @@
-/* Truncator tests:
- *
- * - Doesn't delete html tags.
- */
-
 import nightmare from 'nightmare'
 import React from 'react';
 import { shallow, mount } from 'enzyme';
@@ -23,6 +18,8 @@ describe('Truncation scenarios', () => {
 	const basicTruncationExpectations = (o) => {
 		expect(o.text.substr(-3)).toBe('...')
 		expect(o.text.length>3).toBeTruthy()
+		expect(o.text.substr(-4, 1)).not.toBe(' ')
+		expect(o.text.substr(-4, 1)).not.toBe(',')
 		expect(o.isInBoundaries).toBeTruthy()
 	}
 
@@ -133,8 +130,8 @@ describe('Truncation scenarios', () => {
 		let o = await page.evaluate(() => {
 			let r1 = {}
 			let r2 = {}
-			elem = document.getElementById('test')
-			child = elem.firstChild
+			let elem = document.getElementById('test')
+			let child = elem.firstChild
 			r1.text = elem.textContent
 			r1.isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
 			return new Promise((resolve, reject) => {
@@ -156,8 +153,8 @@ describe('Truncation scenarios', () => {
 		let o = await page.evaluate(() => {
 			let r1 = {}
 			let r2 = {}
-			elem = document.getElementById('test')
-			child = elem.firstChild
+			let elem = document.getElementById('test')
+			let child = elem.firstChild
 			r1.text = elem.textContent
 			r1.isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
 			return new Promise((resolve, reject) => {
@@ -171,6 +168,17 @@ describe('Truncation scenarios', () => {
 		expect(o.r1.text==o.r2.text).toBeFalsy()
 		basicTruncationExpectations(o.r1)
 		basicTruncationExpectations(o.r2)
+	})
+
+	test('Renders custom ellipsis', async () => {
+		page.goto('http://localhost:3000/with-custom-ellipsis')
+		let o = await page.evaluate(() => {
+			let elem = document.getElementById('test')
+			let child = elem.firstChild
+			let isInBoundaries = (elem.offsetTop + elem.offsetHeight) > (child.offsetTop + child.offsetHeight)
+			return { text: elem.textContent, isInBoundaries }
+		})
+		expect(o.text.includes('[ Read more ]')).toBeTruthy()
 	})
 
 	afterAll(() => {
