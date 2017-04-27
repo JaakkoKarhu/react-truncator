@@ -17,9 +17,13 @@
     ],
     "parser": "babel-eslint",
     "rules": {
+        "arrow-parens": [
+            "warn",
+            "always"
+        ],
         "block-spacing": [
-          "warn",
-          "always"
+            "warn",
+            "always"
         ],
         "brace-style": [
             "warn",
@@ -74,7 +78,16 @@
         "no-case-declarations": [
             "error"
         ],
+        "no-confusing-arrow": [
+            "warn"
+        ],
+        "no-const-assign": [
+            "error"
+        ],
         "no-duplicate-case": [
+            "error"
+        ],
+        "no-duplicate-imports": [
             "error"
         ],
         "no-dupe-args": [
@@ -113,6 +126,9 @@
         "no-shadow": [
             "error"
         ],
+        "no-this-before-super": [
+            "error"
+        ],
         "no-trailing-spaces": [
             "warn"
         ],
@@ -132,6 +148,9 @@
             "error"
         ],
         "no-unused-vars": [
+            "error"
+        ],
+        "no-var": [
             "error"
         ],
         "nonblock-statement-body-position": [
@@ -167,6 +186,9 @@
         "prefer-promise-reject-errors": [
             "error"
         ],
+        "prefer-template": [
+            "error"
+        ],
         "require-await": [
             "error"
         ],
@@ -178,6 +200,9 @@
         "semi": [
             "warn",
             "never"
+        ],
+        "sort-imports": [
+            "warn"
         ],
         "space-before-blocks": [
           "warn"
