@@ -1,0 +1,195 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true,
+            "jsx": true
+        },
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react"
+    ],
+    "parser": "babel-eslint",
+    "rules": {
+        "block-spacing": [
+          "warn",
+          "always"
+        ],
+        "brace-style": [
+            "warn",
+            "1tbs"
+        ],
+        "camelcase": [
+            "warn",
+            { "properties": "always" }
+        ],
+        "comma-dangle": [
+            "warn"
+        ],
+        "dot-location": [
+            "warn"
+        ],
+        "default-case": [
+            "warn"
+        ],
+        "func-call-spacing": [
+            "warn"
+        ],
+        "func-name-mathing": [
+            "error",
+            "always"
+        ],
+        "func-style": [
+            "warn",
+            "expression"
+        ],
+        "indent": [
+            "warn",
+            2
+        ],
+        "jsx-quotes": [
+            "warn",
+            "prefer-single"
+        ],
+        "max-len": [
+            "warn",
+            { "ignoreTemplateLiterals": true },
+            { "ignoreComments": true }
+        ],
+        "max-depth": [
+            "warn"
+        ],
+        "new-cap": [
+            "error"
+        ],
+        "newline-per-chained-call": [
+            "error"
+        ],
+        "no-case-declarations": [
+            "error"
+        ],
+        "no-duplicate-case": [
+            "error"
+        ],
+        "no-dupe-args": [
+            "error"
+        ],
+        "no-dupe-keys": [
+            "error"
+        ],
+        "no-empty": [
+            "warn"
+        ],
+        "no-empty-function": [
+            "warn"
+        ],
+        "no-eq-null": [
+            "error"
+        ],
+        "no-fallthrough": [
+            "error"
+        ],
+        "no-invalid-this": [
+            "error"
+        ],
+        "no-implicit-coercion": [
+            "warn"
+        ],
+        "no-mixed-spaces-and-tabs": [
+            "warn"
+        ],
+        "no-nested-ternary": [
+            "error"
+        ],
+        "no-return-await": [
+            "warn"
+        ],
+        "no-shadow": [
+            "error"
+        ],
+        "no-trailing-spaces": [
+            "warn"
+        ],
+        "no-undef": [
+            "error"
+        ],
+        "no-underscore-dangle": [
+            "error"
+        ],
+        "no-unexpected-multiline": [
+            "error"
+        ],
+        "no-unneeded-ternary": [
+            "error"
+        ],
+        "no-unused-expressions": [
+            "error"
+        ],
+        "no-unused-vars": [
+            "error"
+        ],
+        "nonblock-statement-body-position": [
+            "error"
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "object-curly-spacing": [
+            "warn",
+            "always"
+        ],
+        "one-var": [
+            "warn",
+            "always"
+        ],
+        "operator-assignment": [
+            "warn",
+            "always"
+        ],
+        "operator-linebreak": [
+            "warn",
+            "before"
+        ],
+        "prefer-const": [
+            "error",
+            { "destructuring": "all"}
+        ],
+        "prefer-destructuring": [
+            "error"
+        ],
+        "prefer-promise-reject-errors": [
+            "error"
+        ],
+        "require-await": [
+            "error"
+        ],
+        "quotes": [
+            "error",
+            "single",
+            { "allowTemplateLiterals": true }
+        ],
+        "semi": [
+            "warn",
+            "never"
+        ],
+        "space-before-blocks": [
+          "warn"
+        ],
+        "use-isnan": [
+            "warn"
+        ],
+        "valid-typeof": [
+            "error"
+        ],
+        "vars-on-top": [
+            "warn"
+        ]
+    }
+}

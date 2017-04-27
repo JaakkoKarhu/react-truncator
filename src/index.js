@@ -11,13 +11,9 @@
  */
 
 /* TODO
- * 
- * - Remove comma or extra dot from the end
- * - Learn linter
  * - Add PropTypes
  * - Rename fine search to something more descriptive
  * - Remove trackerIndexs and timers ment for presenting
- * - Add custom concenation instead of dot dot dot
  * - Split component did update functions to pure functions
  * - Cleaning
  * - Make style passable directly to truncator
@@ -25,8 +21,8 @@
  * - Write docs
  */
 
-import React from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
+import React from 'react'
+import ResizeObserver from 'resize-observer-polyfill'
 
 const defaultState = {
   segments: [],
@@ -58,7 +54,6 @@ class Truncator extends React.Component {
       this.setState({ concatted: this.props.children })
     } else {
       let segments
-      let needsParsing
       if (typeof this.props.children=='object') {
         let plainString = this.convertToPlainString(this.props.children)
         segments = [ { str: plainString } ]
@@ -70,7 +65,7 @@ class Truncator extends React.Component {
     }
   }
 
-  convertToPlainString = (children, plain="") => {
+  convertToPlainString = (children, plain='') => {
     if (Array.isArray(children)) {
       for (let i = 0; i < children.length; i++) {
         let child = children[i]
@@ -100,7 +95,7 @@ class Truncator extends React.Component {
     newSegments.splice(splitKey+1, 0, { str: _2nd }) // Same applies here
     this.setState({ segments: newSegments, trackerIndex: splitKey }, this.evaluateTruncation)
   }
- 
+
   componentDidMount() {
     this.init()
     this.ro = new ResizeObserver((entries) => {
@@ -177,7 +172,7 @@ class Truncator extends React.Component {
         // ...until can be set as plain text
         let concatted = ''
         const { ellipsis } = this.props
-        const ellipsisLength = this.getEllipsisLength(ellipsis ? ellipsis : '...')
+        const ellipsisLength = this.getEllipsisLength(ellipsis ? ellipsis : "...")
         fine = segsOnSameLine ? fine + 1 : fine
         segments.splice(fine, segments.length)
         segments.map((segment) => concatted += segment.str )
@@ -273,7 +268,7 @@ class Truncator extends React.Component {
       let trackerIndex = i===this.state.trackerIndex ? 'tracker' : ''
       return (
         <trnc-seg key={i}
-                  class={ `${o.className ? o.className : ''} ${ trackerIndex }` }>
+                  class={ `${ o.className ? o.className : '' } ${ trackerIndex }` }>
           {o.str}
         </trnc-seg>
       )
@@ -287,7 +282,7 @@ class Truncator extends React.Component {
     let elems
     let spans = this.getSpans(segments) // segs actually
     if (concatted&&needsParsing) {
-      elems = this.convertToConcattedChild(this.props.children, '').reactElem
+      elems = this.convertToConcattedChild(children, '').reactElem
     } else  {
       elems = concatted
     }
@@ -296,7 +291,7 @@ class Truncator extends React.Component {
         {
           elems!=null
           ? [elems, ( needsEllipsis ?  ellipsis : '' )]
-          : spans.length > 0 ? spans : this.props.children
+          : spans.length > 0 ? spans : children
         }
       </trnc-wrap>
     );
