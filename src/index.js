@@ -1,33 +1,17 @@
-/* THIS IS A PROTOTYPE OF A TRUNCATE COMPONENT
- * DO NOT USE YET!!
- *
- * Few words about logic:
- * - Split string, add elements
- * - Find element y
- * - Use y value to figure out if should be renedered
- * - Decision to truncate can be based on parent elem
- * - Recognise component/tag coming in - before that use proptypes
- * - Add resize event
- */
-
 /* TODO
- * - Add PropTypes
- * - Rename fine search to something more descriptive
- * - Remove trackerIndexs and timers ment for presenting
- * - Split component did update functions to pure functions
- * - Cleaning
- * - Make style passable directly to truncator
- * - Inject style
+ *
+ * - Base keys something else than index
  * - Write docs
  */
 
+import PropTypes from 'prop-types'
 import React from 'react'
 import ResizeObserver from 'resize-observer-polyfill'
 
 const defaultState = {
-  segments: [],
+  segs: [],
   concatted: null,
-  fine: null,
+  fineIndex: null,
   needsParsing: false,
   needsEllipsis: false
 }
@@ -35,77 +19,24 @@ const defaultState = {
 class Truncator extends React.Component {
 
   static propTypes = {
-    // children: proptype node? any?
-    // ellipsis: string || object
+    ellipsis: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.array,
+      PropTypes.object
+    ])
   }
 
   constructor(props) {
-    super (props)
+    super(props)
     this.state = defaultState
-  }
-
-  init = () => {
-    let parent = this.refs.truncated.parentNode
-    let { truncated } = this.refs
-    let paddingBottom = parseInt( window.getComputedStyle(parent).paddingBottom.replace('px', ''))
-    let parentBottomY = parent.offsetTop + parent.offsetHeight - paddingBottom
-    let noNeedToTruncate = (truncated.offsetTop+truncated.offsetHeight)<(parentBottomY)
-    if (noNeedToTruncate) {
-      this.setState({ concatted: this.props.children })
-    } else {
-      let segments
-      if (typeof this.props.children=='object') {
-        let plainString = this.convertToPlainString(this.props.children)
-        segments = [ { str: plainString } ]
-        this.setState({ needsParsing: true })
-      } else if (typeof this.props.children=='string') {
-        segments = [ { str: this.props.children} ]
-      }
-      this.splitSegment(segments, 0)
-    }
-  }
-
-  convertToPlainString = (children, plain='') => {
-    if (Array.isArray(children)) {
-      for (let i = 0; i < children.length; i++) {
-        let child = children[i]
-        if (typeof child == 'object'&&child.props) {
-          plain = this.convertToPlainString(child.props.children, plain)
-        } else if (typeof child == 'string' ) {
-          plain = plain + child
-        }
-      }
-      return plain
-    } else if (typeof children == 'object'&&children.props) {
-      return plain = this.convertToPlainString(children.props.children, plain)
-    } else if (typeof children == 'string') {
-      return plain = plain + children
-    }
-  }
-
-  splitSegment = (_segments, splitKey) => {
-    let newSegments = [ ..._segments ] // Remove underscore naming
-    let segment = newSegments[splitKey]
-    let str = segment.str
-    let length = Math.ceil(str.length/2)
-    let _1st = str.substring(0, length);
-    let _2nd = str.substring(length);
-    newSegments.splice(splitKey, 1)
-    newSegments.splice(splitKey, 0, { str: _1st }) // Why splice here, why just not set?
-    newSegments.splice(splitKey+1, 0, { str: _2nd }) // Same applies here
-    this.setState({ segments: newSegments, trackerIndex: splitKey }, this.evaluateTruncation)
   }
 
   componentDidMount() {
     this.init()
-    this.ro = new ResizeObserver((entries) => {
+    this.ro = new ResizeObserver(() => {
       this.setState(defaultState, this.init)
     })
     this.ro.observe(this.refs.truncated.parentNode)
-  }
-
-  componentWillUnmount() {
-    this.ro.unobserve(this.refs.truncated.parentNode)
   }
 
   componentWillReceiveProps(nP) {
@@ -114,16 +45,170 @@ class Truncator extends React.Component {
     }
   }
 
-  fineSearch = (_segments, fine) => {
-    let newSegments = [ ..._segments ]
-    let segment = newSegments[fine]
-    let str = segment.str
-    let indexOf = str.indexOf(' ') + 1
-    let _1st = str.substring(0, indexOf)
-    let _2nd = str.substring(indexOf, str.length)
-    newSegments[fine-1] = { str: newSegments[fine-1].str + _1st, className: 'fine' }
-    newSegments[fine] = { str: _2nd, className: 'fine' }
-    this.setState({ segments: newSegments, fine }, this.evaluateTruncation)
+  componentWillUnmount() {
+    this.ro.unobserve(this.refs.truncated.parentNode)
+  }
+
+
+  init = () => {
+    const { parentNode } = this.refs.truncated,
+          { truncated } = this.refs,
+          { children } = this.props,
+          paddingBottom = parseInt( window.getComputedStyle(parentNode).paddingBottom.replace('px', '')),
+          parentNodeOffsetBottom = parentNode.offsetTop + parentNode.offsetHeight,
+          parentNodeBottomBoundary = parentNodeOffsetBottom - paddingBottom,
+          truncatedOffsetBottom = truncated.offsetTop+truncated.offsetHeight,
+          noNeedToTruncate = truncatedOffsetBottom<(parentNodeBottomBoundary)
+    if (noNeedToTruncate) {
+      this.setState({ concatted: children })
+    } else {
+      let segs
+      if (typeof children=='object') {
+        const str= this.convertToStr(children)
+        segs = [ { str } ]
+        this.setState({ needsParsing: true })
+      } else if (typeof children=='string') {
+        segs = [ { str: children } ]
+      }
+      this.splitSeg(segs, 0)
+    }
+  }
+
+  getTruncatedReactElems = (children, childStr, stopIteration=false) => {
+    /* Recurse through children, shorten the text content of elements,
+     * strip unnecessary elements.
+     */
+    if (Array.isArray(children)) {
+      const nChildren = []
+      let childStrCp = childStr
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i],
+              truncatedElem = this.getTruncatedReactElems(child, childStrCp)
+        nChildren.push(truncatedElem.nChildren)
+        childStrCp = truncatedElem.childStr
+        if (truncatedElem.stopIteration) break
+      }
+      return {
+        childStr: childStrCp,
+        nChildren,
+        stopIteration
+      }
+    } else if (typeof children == 'object') {
+      const grandChildren = children.props.children
+      if (grandChildren) {
+        const truncatedElem = this.getTruncatedReactElems(grandChildren, childStr)
+        return {
+          childStr: truncatedElem.childStr,
+          nChildren: React.createElement(children.type, { ...children.props }, truncatedElem.nChildren),
+          stopIteration: truncatedElem.stopIteration
+        }
+      } else {
+        return {
+          childStr,
+          nChildren: React.createElement(children.type, { ...children.props }),
+          stopIteration
+        }
+      }
+    } else if (typeof children == 'string') {
+      const { concatted } = this.state
+      if (!concatted.includes(childStr + children)) {
+        const cutOut = concatted.replace(childStr, '')
+        return {
+          childStr: childStr + children,
+          nChildren: cutOut,
+          stopIteration: true
+        }
+      } else {
+        return {
+          childStr: childStr + children,
+          nChildren: children,
+          stopIteration
+        }
+      }
+    }
+  }
+
+  convertToStr = (children, str='') => {
+    // Get content of the children as plain string
+    if (Array.isArray(children)) {
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i]
+        if (typeof child == 'object'&&child.props) {
+          str = this.convertToStr(child.props.children, str)
+        } else if (typeof child == 'string' ) {
+          str += child
+        }
+      }
+      return str
+    } else if (typeof children == 'object'&&children.props) {
+      return str = this.convertToStr(children.props.children, str)
+    } else if (typeof children == 'string') {
+      return str += children
+    }
+  }
+
+  evaluateTruncation = () => {
+    /* Wrap this function to setTimeout for visual debugging
+     */
+    const { parentNode } = this.refs.truncated,
+          paddingBottom = parseInt( window.getComputedStyle(parentNode).paddingBottom.replace('px', '')),
+          parentNodeOffsetBottom = parentNode.offsetTop + parentNode.offsetHeight,
+          parentNodeBottomBoundary = parentNodeOffsetBottom - paddingBottom,
+          { childNodes } = this.refs.truncated,
+          segsCp = [ ...this.state.segs] // Could be segs copy etc
+    let { fineIndex } = this.state
+    if (fineIndex&&this.state.concatted===null) {
+      /* FineIndex refers to the text segment, where iteration based on
+       * space starts. When the offset top changes, the last fitting word
+       * has been found.
+       */
+      const fineNode = childNodes[fineIndex],
+            fineNodePrev = childNodes[fineIndex-1],
+            hasSameHeight = fineNode.offsetHeight==fineNodePrev.offsetHeight,
+            hasSameTop = fineNode.offsetTop==fineNodePrev.offsetTop,
+            segsOnSameLine = (hasSameHeight)&&(hasSameTop),
+            prevSegHigher = fineNode.offsetTop>fineNodePrev.offsetTop
+      if (segsOnSameLine||prevSegHigher) {
+        const { ellipsis } = this.props,
+              ellipsisLength = this.getEllipsisLength(ellipsis || '...')
+        let concatted = ''
+        fineIndex = segsOnSameLine ? fineIndex + 1 : fineIndex
+        segsCp.splice(fineIndex, segsCp.length)
+        segsCp.map((seg) => concatted += seg.str )
+        concatted = concatted.substring(0, concatted.length - ellipsisLength)
+        concatted = this.removeTrails(concatted)
+        this.setState({ concatted, needsEllipsis: true })
+      } else if (!segsOnSameLine) {
+        this.rearrangeSegsBySpace(segsCp, fineIndex)
+      }
+    } else if (this.state.concatted===null) {
+      // Split segments to half until last fitting line is found
+      for (let i = 0; i < childNodes.length; i++) {
+        const { truncated } = this.refs,
+              node = childNodes[i],
+              nodeNext = childNodes[i+1],
+              nodeOffsetBottom = node.offsetTop + node.offsetHeight,
+              shouldRearrangeBySpace = nodeNext&&nodeNext.offsetTop===node.offsetTop,
+              flowsOverBottom = parentNodeBottomBoundary<nodeOffsetBottom,
+              isFirstLine = truncated.offsetTop==node.offsetTop
+        if (!isFirstLine&&shouldRearrangeBySpace&&flowsOverBottom) {
+          // Mid of the segments is overlapping bottom border
+          this.splitSeg(segsCp, i-1)
+          break
+        } else if (shouldRearrangeBySpace&&flowsOverBottom) {
+          // Text does not fit
+          this.setState({ concatted: '' })
+          break
+        } else if (shouldRearrangeBySpace) {
+          // Go to "fine search"
+          this.rearrangeSegsBySpace(segsCp, i + 1)
+          break
+        } else if (flowsOverBottom) {
+          this.splitSeg(segsCp, i)
+          break
+        }
+      }
+    }
   }
 
   getEllipsisLength = (e) => {
@@ -132,8 +217,8 @@ class Truncator extends React.Component {
       let str = ''
       e.map((o) => {
         if (o.props) {
-          let { children } = o.props
-          str += o.props ? o.props : ''
+          const { children } = o.props
+          str += children || ''
         } else {
           str += o
         }
@@ -144,158 +229,89 @@ class Truncator extends React.Component {
     } else if (typeof e == 'string') {
       l = e.length
     }
-    return l ? l + 1 : l
+    return l + 1 || l
   }
 
-  removeTrails = (c) => {
-    let l = c.substring(c.length-1)
-    if (l==' '||l==',') {
-      c = this.removeTrails(c.slice(0, c.length-1 ))
-    }
-    return c
-  }
-
-  evaluateTruncation = () => {
-    //setTimeout(() => {
-    let parent = this.refs.truncated.parentNode
-    let paddingBottom = parseInt( window.getComputedStyle(parent).paddingBottom.replace('px', ''))
-    let parentBottomY = parent.offsetTop + parent.offsetHeight - paddingBottom
-    let childNodes = this.refs.truncated.childNodes
-    let fine = this.state.fine
-    let segments = [ ...this.state.segments] // Could be segments copy etc
-    if (fine&&this.state.concatted==null) {
-      let cF = childNodes[fine]
-      let cF_ = childNodes[fine-1]
-      let segsOnSameLine = (cF.offsetHeight==cF_.offsetHeight)&&(cF.offsetTop==cF_.offsetTop)
-      let previousSegmentHigher = cF.offsetTop>cF_.offsetTop
-      if (segsOnSameLine||previousSegmentHigher) {
-        // ...until can be set as plain text
-        let concatted = ''
-        const { ellipsis } = this.props
-        const ellipsisLength = this.getEllipsisLength(ellipsis ? ellipsis : "...")
-        fine = segsOnSameLine ? fine + 1 : fine
-        segments.splice(fine, segments.length)
-        segments.map((segment) => concatted += segment.str )
-        concatted = concatted.substring(0, concatted.length - ellipsisLength)
-        concatted = this.removeTrails(concatted)
-        this.setState({ concatted, needsEllipsis: true })
-      } else if (!segsOnSameLine) {
-        this.fineSearch(segments, fine)
-      }
-    } else if (this.state.concatted==null) {
-      for (let i = 0; i < childNodes.length; i++) {
-        let { truncated } = this.refs
-        let child = childNodes[i]
-        let nextChild = childNodes[i+1]
-        let childBottomY = child.offsetTop + child.offsetHeight
-        let shouldBeOnFineSearch = nextChild&&nextChild.offsetTop===child.offsetTop
-        let flowsOverBottom = parentBottomY<childBottomY
-        let isFirstLine = truncated.offsetTop==child.offsetTop
-        if (!isFirstLine&&shouldBeOnFineSearch&&flowsOverBottom) {
-          this.splitSegment(segments, i-1)
-          break
-        } else if (shouldBeOnFineSearch&&flowsOverBottom) {
-          this.setState({ concatted: ''})
-          break
-        } else if (shouldBeOnFineSearch) {
-          this.fineSearch(segments, i + 1)
-          break
-        } else if (flowsOverBottom) {
-          this.splitSegment(segments, i)
-          break
-        }
-      }
-    }
-    //}, 100)
-  }
-
-  reactChildren = {}
-
-  convertToConcattedChild = (children, childStr, stopIteration=false) => {
-    if (Array.isArray(children)) {
-      let reactElem = []
-      let childStrCopy = childStr
-      for (let i = 0; i < children.length; i++) {
-        let child = children[i]
-        let parsed = this.convertToConcattedChild(child, childStrCopy)
-        reactElem.push(parsed.reactElem)
-        childStrCopy = parsed.childStr
-        stopIteration = parsed.stopIteration
-        if (parsed.stopIteration) { break }
-      }
-      return {
-        childStr: childStrCopy,
-        reactElem,
-        stopIteration
-      }
-    } else if (typeof children == 'object') {
-      if (children.props.children) {
-        let parsed = this.convertToConcattedChild(children.props.children, childStr)
-        stopIteration = parsed.stopIteration
-        return {
-          childStr: parsed.childStr,
-          reactElem: React.createElement(children.type, { ...children.props }, parsed.reactElem),
-          stopIteration: parsed.stopIteration
-        }
-      } else {
-        return {
-          childStr,
-          reactElem: React.createElement(children.type, { ...children.props }),
-          stopIteration
-        }
-      }
-    } else if (typeof children == 'string') {
-      let concatted = this.state.concatted
-      if (!concatted.includes(childStr + children)) {
-        let cutOut = concatted.replace(childStr, '')
-        return {
-          childStr: childStr + children,
-          reactElem: cutOut,
-          stopIteration: true
-        }
-      } else {
-        return {
-          childStr: childStr + children,
-          reactElem: children,
-          stopIteration
-        }
-      }
-    } 
-  }
-
-  getSpans = (segments) => {
-    return segments.map((o, i) => {
-      let trackerIndex = i===this.state.trackerIndex ? 'tracker' : ''
+  getNodes = (segs) => {
+    return segs.map((o, i) => {
+      const trackerIndex = i===this.state.trackerIndex ? 'tracker' : ''
       return (
         <trnc-seg key={i}
-                  class={ `${ o.className ? o.className : '' } ${ trackerIndex }` }>
+                  class={ `${ o.className || '' } ${ trackerIndex }` }>
           {o.str}
         </trnc-seg>
       )
     })
   }
 
+  rearrangeSegsBySpace = (segs, fineIndex) => {
+    const segsCp = [ ...segs ],
+          seg = segsCp[fineIndex],
+          { str } = seg,
+          indexOf = str.indexOf(' ') + 1,
+          first = str.substring(0, indexOf),
+          second = str.substring(indexOf, str.length)
+    segsCp[fineIndex-1] = {
+      str: segsCp[fineIndex-1].str + first,
+      className: 'fineIndex'
+    }
+    segsCp[fineIndex] = {
+      str: second,
+      className: 'fineIndex'
+    }
+    this.setState({
+      segs: segsCp,
+      fineIndex
+    }, this.evaluateTruncation)
+  }
+
+  removeTrails = (c) => {
+    const l = c.substring(c.length-1)
+    if (l==' '||l==',') {
+      c = this.removeTrails(c.slice(0, c.length-1 ))
+    }
+    return c
+  }
+
+  splitSeg = (segs, i) => {
+    const segsCp = [ ...segs ],
+          seg = segsCp[i],
+          { str } = seg,
+          length = Math.ceil(str.length/2),
+          first = str.substring(0, length),
+          second = str.substring(length)
+    segsCp.splice(i, 1)
+    segsCp.splice(i, 0, { str: first })
+    segsCp.splice(i+1, 0, { str: second })
+    this.setState({
+      segs: segsCp,
+      trackerIndex: i
+    }, this.evaluateTruncation)
+  }
+
   render() {
-    let { segments, concatted, needsParsing, needsEllipsis } = this.state
-    let { ellipsis, children } = this.props
+    const { segs, concatted, needsParsing, needsEllipsis } = this.state,
+          nodes = this.getNodes(segs)
+    let { ellipsis, children } = this.props,
+        elems,
+        rendered
     ellipsis = ellipsis ? ellipsis : '...'
-    let elems
-    let spans = this.getSpans(segments) // segs actually
     if (concatted&&needsParsing) {
-      elems = this.convertToConcattedChild(children, '').reactElem
+      elems = this.getTruncatedReactElems(children, '').nChildren
     } else  {
       elems = concatted
     }
+    if (elems!==null) rendered = [elems, ( needsEllipsis ?  ellipsis : '' )]
+    else rendered = nodes.length > 0 ? nodes : children
+
     return (
-      <trnc-wrap ref="truncated">
+      <trnc-wrap ref='truncated'>
         {
-          elems!=null
-          ? [elems, ( needsEllipsis ?  ellipsis : '' )]
-          : spans.length > 0 ? spans : children
+          rendered
         }
       </trnc-wrap>
-    );
+    )
   }
-};
+}
 
-export default Truncator;
+export default Truncator
