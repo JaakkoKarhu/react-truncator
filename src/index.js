@@ -1,6 +1,6 @@
 /* TODO
  *
- * - Base keys something else than index
+ * - Base trnc-seg keys something else than index
  * - Write docs
  */
 
