@@ -29,7 +29,7 @@ describe('Truncation scenarios', () => {
   }
 
   test('Truncates when wrapper bottom at the first initial binary text block', async () => {
-    page.goto('http://localhost:3000/1st-half')
+    page.goto('http://localhost:3000/#/1st-half')
     const o = await page.evaluate(() => {
       const elem = document.getElementById('test')
       const child = elem.firstChild
@@ -40,7 +40,7 @@ describe('Truncation scenarios', () => {
   })
 
   test('Truncates when wrapper bottom at the second initial binary text block', async () => {
-    page.goto('http://localhost:3000/2nd-half')
+    page.goto('http://localhost:3000/#/2nd-half')
     const o = await page.evaluate(() => {
       const elem = document.getElementById('test')
       const child = elem.firstChild
@@ -51,7 +51,7 @@ describe('Truncation scenarios', () => {
   })
 
   test('Truncates when the middle of initial binary blocks overlaps the wrapper bottom', async () => {
-    page.goto('http://localhost:3000/initial-middle')
+    page.goto('http://localhost:3000/#/initial-middle')
     const o = await page.evaluate(() => {
       const elem = document.getElementById('test')
       const child = elem.firstChild
@@ -62,7 +62,7 @@ describe('Truncation scenarios', () => {
   })
 
   test('Don\'t truncate if text not flowing over the wrapper bottom', async () => {
-    page.goto('http://localhost:3000/shorter-than-wrapper')
+    page.goto('http://localhost:3000/#/shorter-than-wrapper')
     const text = await page.evaluate(() => {
       return document.getElementById('test').textContent
     })
@@ -70,7 +70,7 @@ describe('Truncation scenarios', () => {
   })
 
   test('If only one line, render as it is and don\'t crash', async () => {
-    page.goto('http://localhost:3000/one-line')
+    page.goto('http://localhost:3000/#/one-line')
     const text = await page.evaluate(() => {
       return document.getElementById('test').textContent
     })
@@ -78,7 +78,7 @@ describe('Truncation scenarios', () => {
   })
 
   test('Take padding in account when truncating', async () => {
-    page.goto('http://localhost:3000/with-padding')
+    page.goto('http://localhost:3000/#/with-padding')
     const o = await page.evaluate(() => {
       const elem = document.getElementById('test')
       const child = elem.firstChild
@@ -94,12 +94,12 @@ describe('Truncation scenarios', () => {
   })
 
   test('Doesn\'t render any text if not enough space in wrapper', async () => {
-    page.goto('http://localhost:3000/with-too-much-padding')
+    page.goto('http://localhost:3000/#/with-too-much-padding')
     const text1 = await page.evaluate(() => {
       const elem = document.getElementById('test')
       return elem.textContent
     })
-    page.goto('http://localhost:3000/too-narrow-wrapper')
+    page.goto('http://localhost:3000/#/too-narrow-wrapper')
     const text2 = await page.evaluate(() => {
       const elem = document.getElementById('test')
       return elem.textContent
@@ -109,7 +109,7 @@ describe('Truncation scenarios', () => {
   })
 
   test('Renders correctly with nested span elements', async () => {
-    page.goto('http://localhost:3000/text-has-inline-elements')
+    page.goto('http://localhost:3000/#/text-has-inline-elements')
     const o = await page.evaluate(() => {
       let isInBoundaries = true
       const elems = document.querySelectorAll('#test')
@@ -131,7 +131,7 @@ describe('Truncation scenarios', () => {
   })
 
   test('Truncates on resize', async () => {
-    page.goto('http://localhost:3000/on-resize')
+    page.goto('http://localhost:3000/#/on-resize')
     const o = await page.evaluate(() => {
       const r1 = {}
       const r2 = {}
@@ -154,7 +154,7 @@ describe('Truncation scenarios', () => {
 
   // Identical with previous, combine.
   test('Truncates on prop change', async () => {
-    page.goto('http://localhost:3000/on-props-change')
+    page.goto('http://localhost:3000/#/on-props-change')
     const o = await page.evaluate(() => {
       const r1 = {}
       const r2 = {}
@@ -176,7 +176,7 @@ describe('Truncation scenarios', () => {
   })
 
   test('Renders custom ellipsis', async () => {
-    page.goto('http://localhost:3000/with-custom-ellipsis')
+    page.goto('http://localhost:3000/#/with-custom-ellipsis')
     const o = await page.evaluate(() => {
       const elem = document.getElementById('test')
       const child = elem.firstChild
