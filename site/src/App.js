@@ -187,7 +187,6 @@ class OnPropsChange extends React.Component {
 };
 
 const isActive = (location, pathname) => {
-  console.log('App.js', '-->>', location, pathname);
   return location.pathname==pathname
 }
 

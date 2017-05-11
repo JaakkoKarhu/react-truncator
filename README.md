@@ -2,6 +2,8 @@
 
 Truncate component for React.
 
+Examples: [jaakkokarhu.github.io/react-truncator](https://jaakkokarhu.github.io/react-truncator)
+
 ## Development
 
 The development environment is already setup and ready to go (hot-loading and linting included!)
