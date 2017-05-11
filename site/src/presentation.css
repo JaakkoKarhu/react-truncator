@@ -1,0 +1,129 @@
+/* Font-family: http://www.cssfontstack.com/Franklin-Gothic-Medium
+ * Color scheme: https://coolors.co/ef6461-e8e9eb-e0dfd5-e4b363-313638
+ *
+ * TODO
+ *
+ * - Add css linter
+ */
+html, body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+[class^="presentation"] h1 {
+  color: #313638;
+  font-family: "Franklin Gothic Medium", "Franklin Gothic", "ITC Franklin Gothic", Arial, sans-serif;
+  font-size: 34px;
+  border-bottom: solid 3px #EF6461;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 700;
+  line-height: 31px;
+}
+[class^="presentation"] h2 {
+  color: #E65F5C;
+  font-family: "Franklin Gothic Medium", "Franklin Gothic", "ITC Franklin Gothic", Arial, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 600;
+  text-transform: uppercase;
+  line-height: 15.4px;
+}
+[class^="presentation"] h3 {
+  font-family: "Franklin Gothic Medium", "Franklin Gothic", "ITC Franklin Gothic", Arial, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 500;
+  line-height: 15.4px;
+}
+[class^="presentation"] p,
+[class^="presentation"] li {
+  font-family: "Franklin Gothic Medium", "Franklin Gothic", "ITC Franklin Gothic", Arial, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+[class^="presentation"] blockquote {
+  font-family: "Franklin Gothic Medium", "Franklin Gothic", "ITC Franklin Gothic", Arial, sans-serif;
+  font-size: 21px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 30px;
+}
+[class^="presentation"] pre {
+  font-family: "Franklin Gothic Medium", "Franklin Gothic", "ITC Franklin Gothic", Arial, sans-serif;
+  font-size: 13px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 18.5714px;
+}
+
+.presentation-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100%;
+  background-color: #313638;
+}
+
+.presentation-sidebar li,
+.presentation-sidebar li a {
+  line-height: 1.15;
+  margin-bottom: 7.5px;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 12px;
+  list-style-type: none;
+  color: #E8C07F;
+}
+
+.presentation-sidebar li.active,
+.presentation-sidebar li a.active {
+  text-decoration: underline;
+}
+
+.presentation-content {
+  overflow: scroll;
+  padding: 15px;
+  margin-left: 200px;
+  background-color: #F9F9F7;
+  top: 0;
+  right: 0;
+  left: 0;
+  position: fixed;
+  bottom: 0;
+}
+
+[class^="presentation-section"] {
+  overflow: hidden;
+  float: left;
+}
+
+.presentation-section-50 {
+  width: 50%;
+}
+
+.presentation-well-json {
+  box-sizing: border-box;
+  border-radius: 5px;
+  padding: 15px;
+  color: #F6F6F3;
+  width: 100%;
+  display: block;
+  height: auto;
+  background-color: #121415;
+  font-family: Rockwell, "Courier Bold", Courier, Georgia, Times, "Times New Roman", serif;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 1.25;
+}

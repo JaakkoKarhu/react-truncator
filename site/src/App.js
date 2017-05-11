@@ -1,10 +1,17 @@
+/* TODO
+ *
+ * - Make the examples to work with Github pages
+ */
+
 import React from 'react';
 import Truncator from '../../src';
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Route,
-  Link
+  Link,
+  NavLink
 } from 'react-router-dom'
+import './presentation.css'
 
 const FirstHalf = () => (
   <div className="text-wrapper"
@@ -179,84 +186,117 @@ class OnPropsChange extends React.Component {
   }
 };
 
-const App = () => (
+const isActive = (location, pathname) => {
+  console.log('App.js', '-->>', location, pathname);
+  return location.pathname==pathname
+}
+
+const App = (props) => (
   <Router>
-    <div>
-      <ul>
-        <li>
-          <Link to="1st-half">
-            Truncate in 1st initial half
-          </Link>
-        </li>
-        <li>
-          <Link to="2nd-half">
-            Truncate in 2nd initial half
-          </Link>
-        </li>
-        <li>
-          <Link to="initial-middle">
-            Truncate in initial middle
-          </Link>
-        </li>
-        <li>
-          <Link to="shorter-than-wrapper">
-            Text shorter than wrapper
-          </Link>
-        </li>
-        <li>
-          <Link to="one-line">
-            Text is just one line
-          </Link>
-        </li>
-        <li>
-          <Link to="with-padding">
-            Parent element has padding
-          </Link>
-        </li>
-        <li>
-          <Link to="with-too-much-padding">
-            Parent element has too much padding
-          </Link>
-        </li>
-        <li>
-          <Link to="too-narrow-wrapper">
-            Wrapper element is too narrow
-          </Link>
-        </li>
-        <li>
-          <Link to="text-has-inline-elements">
-            Text has inline elements
-          </Link>
-        </li>
-        <li>
-          <Link to="on-resize">
-            On resize
-          </Link>
-        </li>
-        <li>
-          <Link to="on-props-change">
-            On props change
-          </Link>
-        </li>
-        <li>
-          <Link to="with-custom-ellipsis">
-            With ellipsis
-          </Link>
-        </li>
-      </ul>
-      <Route path="/1st-half" component={ FirstHalf } />
-      <Route path="/2nd-half" component={ SecondHalf } />
-      <Route path="/initial-middle" component={ InitialMiddle } />
-      <Route path="/shorter-than-wrapper" component={ ShorterThanWrapper } />
-      <Route path="/one-line" component={ OneLine } />
-      <Route path="/with-padding" component={ () => WithPadding('30px') } />
-      <Route path="/with-too-much-padding" component={ () => WithPadding('50px') } />
-      <Route path="/too-narrow-wrapper" component={ TooNarrowWrapper } />
-      <Route path="/text-has-inline-elements" component={ TextHasInlineElements } />
-      <Route path="/on-resize" component={ OnResize } />
-      <Route path="/on-props-change" component={ OnPropsChange } />
-      <Route path="/with-custom-ellipsis" component={ WithCustomEllipsis } />
-    </div>
+    <section>
+      <div className='presentation-sidebar'>
+        <ul>
+          <li>
+            <NavLink to="1st-half"
+                     isActive={(m, loc) => isActive(loc, '/1st-half')}
+                     activeClassName="active">
+              Truncate in 1st initial half
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="2nd-half"
+                     isActive={(m, loc) => isActive(loc, '/2nd-half')}
+                     activeClassName="active">
+              Truncate in 2nd initial half
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="initial-middle"
+                     isActive={(m, loc) => isActive(loc, '/initial-middle')}
+                     activeClassName="active">
+              Truncate in initial middle
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="shorter-than-wrapper"
+                     isActive={(m, loc) => isActive(loc, '/shorter-than-wrapper')}
+                     activeClassName="active">
+              Text shorter than wrapper
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="one-line"
+                     isActive={(m, loc) => isActive(loc, '/one-line')}
+                     activeClassName="active">
+              Text is just one line
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="with-padding"
+                     isActive={(m, loc) => isActive(loc, '/with-padding')}
+                     activeClassName="active">
+              Parent element has padding
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="with-too-much-padding"
+                     isActive={(m, loc) => isActive(loc, '/with-too-much-padding')}
+                     activeClassName="active">
+              Parent element has too much padding
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="too-narrow-wrapper"
+                     isActive={(m, loc) => isActive(loc, '/too-narrow-wrapper')}
+                     activeClassName="active">
+              Wrapper element is too narrow
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="text-has-inline-elements"
+                     isActive={(m, loc) => isActive(loc, '/text-has-inline-elements')}
+                     activeClassName="active">
+              Text has inline elements
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="on-resize"
+                     isActive={(m, loc) => isActive(loc, '/on-resize')}
+                     activeClassName="active">
+              On resize
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="on-props-change"
+                     isActive={(m, loc) => isActive(loc, '/on-props-change')}
+                     activeClassName="active">
+              On props change
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="with-custom-ellipsis"
+                     isActive={(m, loc) => isActive(loc, '/with-custom-ellipsis')}
+                     activeClassName="active">
+              With ellipsis
+            </NavLink>
+          </li>
+        </ul>
+      </div>
+      <div className='presentation-content'>
+        <Route path="/1st-half" component={ FirstHalf } />
+        <Route path="/2nd-half" component={ SecondHalf } />
+        <Route path="/initial-middle" component={ InitialMiddle } />
+        <Route path="/shorter-than-wrapper" component={ ShorterThanWrapper } />
+        <Route path="/one-line" component={ OneLine } />
+        <Route path="/with-padding" component={ () => WithPadding('30px') } />
+        <Route path="/with-too-much-padding" component={ () => WithPadding('50px') } />
+        <Route path="/too-narrow-wrapper" component={ TooNarrowWrapper } />
+        <Route path="/text-has-inline-elements" component={ TextHasInlineElements } />
+        <Route path="/on-resize" component={ OnResize } />
+        <Route path="/on-props-change" component={ OnPropsChange } />
+        <Route path="/with-custom-ellipsis" component={ WithCustomEllipsis } />
+      </div>
+    </section>
   </Router>
 );
 
